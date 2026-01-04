@@ -409,6 +409,19 @@
         elements.tensionSleeve.style.height = `${data.progress}%`;
 
         const pad = n => n.toString().padStart(2, '0');
+
+        // Handle "Get Ready" phase
+        if (data.phase === 'ready') {
+            elements.repCount.textContent = '— / —';
+            elements.phaseLabel.textContent = 'READY';
+            elements.sideLabel.textContent = '—';
+            elements.setLabel.textContent = '— / —';
+            elements.stageText.textContent = 'Get Ready';
+            elements.timerView.classList.remove('state-rest');
+            elements.timerDisplay.classList.remove('vibrate');
+            return;
+        }
+
         elements.repCount.textContent = `${pad(data.rep)} / ${pad(data.totalReps)}`;
         elements.phaseLabel.textContent = data.phase.toUpperCase();
         elements.sideLabel.textContent = data.side || '—';

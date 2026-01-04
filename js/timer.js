@@ -119,6 +119,7 @@ const Timer = (function () {
         state.isRunning = false;
         state.isPaused = false;
         state.settings = settings;
+        state.getReadyDone = false; // Reset for new workout
 
         const current = getCurrentStep();
         state.timeLeft = current.duration;
@@ -137,6 +138,76 @@ const Timer = (function () {
 
     function resume() {
         initAudio(); // Ensure audio context is ready
+
+        // If this is the first start (not a resume from pause), do get-ready countdown
+        if (!state.isPaused && state.currentIndex === 0 && !state.getReadyDone) {
+            startGetReadyCountdown();
+            return;
+        }
+
+        actuallyResume();
+    }
+
+    function startGetReadyCountdown() {
+        state.isRunning = true;
+        state.getReadyCountdown = 3;
+
+        if (state.callbacks.onTick) {
+            state.callbacks.onTick({
+                time: state.getReadyCountdown,
+                progress: 0,
+                phase: 'ready',
+                rep: 0,
+                totalReps: 0,
+                set: 0,
+                side: null,
+                isRunning: true,
+                isGetReady: true
+            });
+        }
+
+        if (state.callbacks.onStateChange) {
+            state.callbacks.onStateChange({ isRunning: true, isGetReady: true });
+        }
+
+        const countdownInterval = setInterval(() => {
+            state.getReadyCountdown--;
+
+            // Play countdown sounds
+            if (state.getReadyCountdown === 2) {
+                sounds.countdown3();
+                vibrations.countdown();
+            } else if (state.getReadyCountdown === 1) {
+                sounds.countdown2();
+                vibrations.countdown();
+            } else if (state.getReadyCountdown === 0) {
+                sounds.countdown1();
+                vibrations.countdown();
+            }
+
+            if (state.callbacks.onTick) {
+                state.callbacks.onTick({
+                    time: state.getReadyCountdown,
+                    progress: ((3 - state.getReadyCountdown) / 3) * 100,
+                    phase: 'ready',
+                    rep: 0,
+                    totalReps: 0,
+                    set: 0,
+                    side: null,
+                    isRunning: true,
+                    isGetReady: true
+                });
+            }
+
+            if (state.getReadyCountdown <= 0) {
+                clearInterval(countdownInterval);
+                state.getReadyDone = true;
+                actuallyResume();
+            }
+        }, 1000);
+    }
+
+    function actuallyResume() {
         state.isRunning = true;
         state.isPaused = false;
 
@@ -155,7 +226,7 @@ const Timer = (function () {
         }, 100);
 
         if (state.callbacks.onStateChange) {
-            state.callbacks.onStateChange({ isRunning: true });
+            state.callbacks.onStateChange({ isRunning: true, isGetReady: false });
         }
     }
 
