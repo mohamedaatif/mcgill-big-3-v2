@@ -32,6 +32,28 @@
                 <h1 id="exerciseName">McGill Big 3</h1>
             </header>
 
+            <!-- Last Session Card (like Hevy) -->
+            <div class="last-session-card hidden" id="lastSessionCard">
+                <div class="last-session-header">
+                    <span class="last-session-label">Last Session</span>
+                    <span class="last-session-date" id="lastSessionDate"></span>
+                </div>
+                <div class="last-session-details">
+                    <div class="session-stat">
+                        <span class="session-stat-value" id="lastLevel">Standard</span>
+                        <span class="session-stat-label">Level</span>
+                    </div>
+                    <div class="session-stat">
+                        <span class="session-stat-value" id="lastPyramid">5-3-1</span>
+                        <span class="session-stat-label">Pyramid</span>
+                    </div>
+                    <div class="session-stat">
+                        <span class="session-stat-value" id="lastHold">10s</span>
+                        <span class="session-stat-label">Hold</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Weekly Consistency -->
             <div class="consistency-card" id="consistencyCard">
                 <div class="consistency-header">
@@ -46,20 +68,19 @@
             <!-- Level Badge & Settings -->
             <div class="level-bar" id="levelBar">
                 <button class="level-badge" id="levelBadge">
-                    <span class="level-icon">🌳</span>
                     <span class="level-name">Standard</span>
                     <span class="level-desc">5-3-1 × 10s</span>
                 </button>
                 <label class="bad-day-toggle">
                     <input type="checkbox" id="badDayMode">
-                    <span class="toggle-label">😓 Bad Day</span>
+                    <span class="toggle-label">Bad Day</span>
                 </label>
             </div>
 
             <!-- Exercise Selection -->
             <div class="exercise-list" id="exerciseList">
                 <div class="exercise-item" data-exercise="curl-up">
-                    <span class="exercise-icon" data-info="curl-up">🔄</span>
+                    <span class="exercise-icon" data-info="curl-up"></span>
                     <div class="exercise-info">
                         <div class="exercise-name">Curl-Up</div>
                         <div class="exercise-meta" data-meta="curl-up">5-3-1 × 10s</div>
@@ -67,7 +88,7 @@
                     <span class="exercise-status">—</span>
                 </div>
                 <div class="exercise-item" data-exercise="side-plank">
-                    <span class="exercise-icon" data-info="side-plank">📐</span>
+                    <span class="exercise-icon" data-info="side-plank"></span>
                     <div class="exercise-info">
                         <div class="exercise-name">Side Plank</div>
                         <div class="exercise-meta" data-meta="side-plank">5-3-1 × 10s (L+R)</div>
@@ -75,7 +96,7 @@
                     <span class="exercise-status">—</span>
                 </div>
                 <div class="exercise-item" data-exercise="bird-dog">
-                    <span class="exercise-icon" data-info="bird-dog">🐕</span>
+                    <span class="exercise-icon" data-info="bird-dog"></span>
                     <div class="exercise-info">
                         <div class="exercise-name">Bird-Dog</div>
                         <div class="exercise-meta" data-meta="bird-dog">5-3-1 × 10s (L+R)</div>
@@ -122,7 +143,12 @@
 
             <!-- Workout Complete View -->
             <div class="workout-complete hidden" id="workoutComplete">
-                <div class="complete-icon">🎉</div>
+                <div class="complete-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
+                </div>
                 <h2 class="complete-title">Exercise Complete!</h2>
                 <p class="complete-message" id="completeMessage">Great work!</p>
                 <div class="complete-stats">
@@ -204,7 +230,7 @@
 
             <!-- Level Up Banner -->
             <div class="level-up-banner hidden" id="levelUpBanner">
-                <p>🎉 Ready to level up!</p>
+                <p>Ready to level up!</p>
                 <button class="btn btn-primary" id="btnLevelUp">Advance Level</button>
             </div>
         </section>

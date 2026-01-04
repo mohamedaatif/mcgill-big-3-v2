@@ -362,9 +362,19 @@
 }
 
 .exercise-icon {
-    font-size: 1.5rem;
-    width: 40px;
-    text-align: center;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--tension-hold);
+}
+
+.exercise-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    fill: none;
 }
 
 .exercise-info {
@@ -558,6 +568,59 @@
     transition: width var(--transition-base);
 }
 
+/* ===== Last Session Card ===== */
+.last-session-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--cable-steel);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.last-session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.last-session-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+}
+
+.last-session-date {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.last-session-details {
+    display: flex;
+    gap: var(--space-lg);
+}
+
+.session-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.session-stat-value {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--tension-hold);
+}
+
+.session-stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+}
+
 /* ===== Settings FAB ===== */
 .settings-fab {
     position: fixed;
@@ -591,8 +654,16 @@
 }
 
 .complete-icon {
-    font-size: 4rem;
     margin-bottom: var(--space-md);
+    color: var(--tension-rest);
+}
+
+.complete-icon svg {
+    width: 64px;
+    height: 64px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
 }
 
 .complete-title {

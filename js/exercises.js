@@ -1,58 +1,83 @@
 /**
  * McGill Big 3 V2 - Exercise Definitions
- * With progression levels and McGill protocol sequencing
+ * With progression levels, McGill protocol sequencing, and SVG icons
  */
 
 const Exercises = (function () {
+    // SVG Icons (professional, minimal)
+    const ICONS = {
+        'curl-up': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 18c-4 0-6-3-6-6s2-6 6-6"/>
+            <path d="M12 6v12"/>
+            <circle cx="12" cy="4" r="2"/>
+        </svg>`,
+        'side-plank': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 20l8-8"/>
+            <path d="M12 12l8 4"/>
+            <circle cx="16" cy="8" r="2"/>
+            <path d="M4 20h4"/>
+        </svg>`,
+        'bird-dog': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 14h6"/>
+            <path d="M14 14h6"/>
+            <path d="M10 14l2-6 2 6"/>
+            <circle cx="12" cy="6" r="2"/>
+        </svg>`
+    };
+
     // Progression levels (McGill-backed)
+    // Rest times based on McGill's recommendations:
+    // - 10-15 seconds between reps (within a set)
+    // - 30 seconds between sets
+    // - 8-10 second holds for endurance
     const LEVELS = {
         beginner: {
             id: 'beginner',
             name: 'Beginner',
-            icon: '🌱',
             pyramid: [3, 2, 1],
             holdDuration: 5,
-            restDuration: 5,
+            restBetweenReps: 10,
+            restBetweenSets: 30,
             description: '3-2-1 × 5s',
             sessionsToAdvance: 7
         },
         developing: {
             id: 'developing',
             name: 'Developing',
-            icon: '🌿',
             pyramid: [5, 3, 1],
             holdDuration: 8,
-            restDuration: 5,
+            restBetweenReps: 10,
+            restBetweenSets: 30,
             description: '5-3-1 × 8s',
             sessionsToAdvance: 7
         },
         standard: {
             id: 'standard',
             name: 'Standard',
-            icon: '🌳',
             pyramid: [5, 3, 1],
             holdDuration: 10,
-            restDuration: 5,
+            restBetweenReps: 10,
+            restBetweenSets: 30,
             description: '5-3-1 × 10s',
             sessionsToAdvance: 14
         },
         advanced: {
             id: 'advanced',
             name: 'Advanced',
-            icon: '💪',
             pyramid: [8, 5, 3],
             holdDuration: 10,
-            restDuration: 5,
+            restBetweenReps: 15,
+            restBetweenSets: 30,
             description: '8-5-3 × 10s',
             sessionsToAdvance: null
         },
         challenge: {
             id: 'challenge',
             name: 'Challenge',
-            icon: '🏆',
             pyramid: [1],
             holdDuration: 60,
-            restDuration: 10,
+            restBetweenReps: 0,
+            restBetweenSets: 60,
             description: '1 × 60s',
             sessionsToAdvance: null
         }
@@ -62,10 +87,10 @@ const Exercises = (function () {
     const BAD_DAY_LEVEL = {
         id: 'badday',
         name: 'Bad Day',
-        icon: '😓',
         pyramid: [3],
         holdDuration: 5,
-        restDuration: 5,
+        restBetweenReps: 10,
+        restBetweenSets: 30,
         description: '3 × 5s gentle'
     };
 
@@ -74,24 +99,25 @@ const Exercises = (function () {
         'curl-up': {
             id: 'curl-up',
             name: 'Curl-Up',
-            icon: '🔄',
+            icon: ICONS['curl-up'],
             bilateral: false,
             instructions: [
                 'Lie on back, one knee bent, foot flat',
-                'Hands under lower back arch',
+                'Hands under lower back to maintain arch',
                 'Lift head and shoulders as one unit',
-                'Keep chin tucked - don\'t pull neck',
+                'Keep chin tucked — don\'t pull neck',
                 'Hold, then slowly lower'
             ],
             tips: [
                 'No movement in lower back',
-                'Imagine grapefruit under chin'
+                'Imagine grapefruit under chin',
+                'Breathe normally throughout hold'
             ]
         },
         'side-plank': {
             id: 'side-plank',
             name: 'Side Plank',
-            icon: '📐',
+            icon: ICONS['side-plank'],
             bilateral: true,
             sides: ['Left', 'Right'],
             instructions: [
@@ -103,25 +129,27 @@ const Exercises = (function () {
             ],
             tips: [
                 'Keep hips aligned with torso',
-                'Breathe normally throughout'
+                'Breathe normally throughout',
+                'Don\'t let hips sag or pike'
             ]
         },
         'bird-dog': {
             id: 'bird-dog',
             name: 'Bird-Dog',
-            icon: '🐕',
+            icon: ICONS['bird-dog'],
             bilateral: true,
             sides: ['Left arm/Right leg', 'Right arm/Left leg'],
             instructions: [
-                'Start on all fours',
-                'Keep spine neutral',
+                'Start on all fours, spine neutral',
+                'Engage core before moving',
                 'Raise opposite arm and leg',
                 'Form straight line hand to foot',
                 'Hold, then return with control'
             ],
             tips: [
                 'No movement in lower back',
-                'Don\'t let hips rotate'
+                'Don\'t let hips rotate',
+                'Move slowly and deliberately'
             ]
         }
     };
@@ -159,7 +187,9 @@ const Exercises = (function () {
     /**
      * Generate workout plan for a single exercise
      * For bilateral exercises: L→R within each pyramid set (McGill protocol)
-     * Example: 5L→5R→Rest→3L→3R→Rest→1L→1R
+     * Uses proper rest durations:
+     * - restBetweenReps: short rest after each hold
+     * - restBetweenSets: longer rest between pyramid sets
      */
     function generateWorkoutPlan(exerciseId, levelId, isBadDay = false) {
         const exercise = exercises[exerciseId];
@@ -168,10 +198,9 @@ const Exercises = (function () {
         if (!exercise) return null;
 
         const plan = [];
-        const { pyramid, holdDuration, restDuration } = level;
+        const { pyramid, holdDuration, restBetweenReps, restBetweenSets } = level;
 
         if (exercise.bilateral) {
-            // McGill protocol: do both sides within each pyramid set
             pyramid.forEach((reps, setIndex) => {
                 // Left side reps
                 for (let rep = 1; rep <= reps; rep++) {
@@ -181,12 +210,11 @@ const Exercises = (function () {
                         rep,
                         totalReps: reps,
                         set: setIndex + 1,
-                        side: exercise.sides[0] // Left
+                        side: exercise.sides[0]
                     });
-                    // Rest after each hold (except last of set if more sides coming)
                     plan.push({
                         type: 'rest',
-                        duration: restDuration,
+                        duration: restBetweenReps,
                         rep,
                         totalReps: reps,
                         set: setIndex + 1,
@@ -202,16 +230,27 @@ const Exercises = (function () {
                         rep,
                         totalReps: reps,
                         set: setIndex + 1,
-                        side: exercise.sides[1] // Right
+                        side: exercise.sides[1]
                     });
 
-                    // Rest after each hold (except very last one)
                     const isLastRep = rep === reps;
                     const isLastSet = setIndex === pyramid.length - 1;
-                    if (!(isLastRep && isLastSet)) {
+
+                    if (isLastRep && !isLastSet) {
+                        // Longer rest between sets
                         plan.push({
                             type: 'rest',
-                            duration: restDuration,
+                            duration: restBetweenSets,
+                            rep,
+                            totalReps: reps,
+                            set: setIndex + 1,
+                            side: exercise.sides[1],
+                            isSetRest: true
+                        });
+                    } else if (!isLastRep || !isLastSet) {
+                        plan.push({
+                            type: 'rest',
+                            duration: restBetweenReps,
                             rep,
                             totalReps: reps,
                             set: setIndex + 1,
@@ -221,7 +260,6 @@ const Exercises = (function () {
                 }
             });
         } else {
-            // Unilateral exercise (curl-up)
             pyramid.forEach((reps, setIndex) => {
                 for (let rep = 1; rep <= reps; rep++) {
                     plan.push({
@@ -234,10 +272,20 @@ const Exercises = (function () {
 
                     const isLastRep = rep === reps;
                     const isLastSet = setIndex === pyramid.length - 1;
-                    if (!(isLastRep && isLastSet)) {
+
+                    if (isLastRep && !isLastSet) {
                         plan.push({
                             type: 'rest',
-                            duration: restDuration,
+                            duration: restBetweenSets,
+                            rep,
+                            totalReps: reps,
+                            set: setIndex + 1,
+                            isSetRest: true
+                        });
+                    } else if (!isLastRep || !isLastSet) {
+                        plan.push({
+                            type: 'rest',
+                            duration: restBetweenReps,
                             rep,
                             totalReps: reps,
                             set: setIndex + 1
@@ -257,6 +305,7 @@ const Exercises = (function () {
 
     return {
         LEVELS,
+        ICONS,
         getExercise,
         getAllExercises,
         getLevel,

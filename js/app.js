@@ -15,6 +15,13 @@
         greeting: document.getElementById('greeting'),
         exerciseName: document.getElementById('exerciseName'),
 
+        // Workout - Last Session
+        lastSessionCard: document.getElementById('lastSessionCard'),
+        lastSessionDate: document.getElementById('lastSessionDate'),
+        lastLevel: document.getElementById('lastLevel'),
+        lastPyramid: document.getElementById('lastPyramid'),
+        lastHold: document.getElementById('lastHold'),
+
         // Workout - Consistency
         weeklyScore: document.getElementById('weeklyScore'),
         consistencyFill: document.getElementById('consistencyFill'),
@@ -100,6 +107,7 @@
     function init() {
         updateGreeting();
         initNavigation();
+        initExerciseIcons();
         initLevelControls();
         initWorkoutPage();
         initPainPage();
@@ -109,10 +117,22 @@
         updateLevelDisplay();
         updateExerciseMeta();
         updateConsistencyCard();
+        updateLastSessionCard();
         updateProgressPage();
         updatePainPage();
         loadSettings();
         resetTodayProgress();
+    }
+
+    // ===== Exercise Icons (SVG injection) =====
+    function initExerciseIcons() {
+        document.querySelectorAll('.exercise-icon[data-info]').forEach(icon => {
+            const exerciseId = icon.dataset.info;
+            const exercise = Exercises.getExercise(exerciseId);
+            if (exercise && exercise.icon) {
+                icon.innerHTML = exercise.icon;
+            }
+        });
     }
 
     // ===== Greeting =====
@@ -149,6 +169,41 @@
         if (pageId === 'progress') updateProgressPage();
         if (pageId === 'pain') updatePainPage();
         if (pageId === 'settings') loadSettings();
+    }
+
+    // ===== Last Session Card =====
+    function updateLastSessionCard() {
+        const workouts = Storage.getWorkouts();
+        if (workouts.length === 0) {
+            elements.lastSessionCard.classList.add('hidden');
+            return;
+        }
+
+        // Get most recent workout
+        const lastWorkout = workouts[0];
+        const lastLevel = Exercises.getLevel(lastWorkout.level || 'standard');
+
+        // Format date
+        const date = new Date(lastWorkout.date);
+        const now = new Date();
+        const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+        let dateStr;
+        if (diffDays === 0) {
+            dateStr = 'Today';
+        } else if (diffDays === 1) {
+            dateStr = 'Yesterday';
+        } else if (diffDays < 7) {
+            dateStr = `${diffDays} days ago`;
+        } else {
+            dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        elements.lastSessionDate.textContent = dateStr;
+        elements.lastLevel.textContent = lastLevel.name;
+        elements.lastPyramid.textContent = lastLevel.pyramid.join('-');
+        elements.lastHold.textContent = `${lastLevel.holdDuration}s`;
+        elements.lastSessionCard.classList.remove('hidden');
     }
 
     // ===== Consistency Card =====
@@ -204,7 +259,6 @@
             const isActive = level.id === settings.level ? 'active' : '';
             html += `
                 <button class="level-option ${isActive}" data-level="${level.id}">
-                    <span class="level-icon">${level.icon}</span>
                     <span class="level-name">${level.name}</span>
                     <span class="level-desc">${level.description}</span>
                 </button>
@@ -235,7 +289,6 @@
             Exercises.getBadDayLevel() :
             Exercises.getLevel(settings.level);
 
-        elements.levelBadge.querySelector('.level-icon').textContent = level.icon;
         elements.levelBadge.querySelector('.level-name').textContent = level.name;
         elements.levelBadge.querySelector('.level-desc').textContent = level.description;
 
@@ -337,6 +390,7 @@
         elements.timerView.classList.remove('hidden');
         elements.exerciseList.classList.add('hidden');
         document.getElementById('consistencyCard').classList.add('hidden');
+        elements.lastSessionCard.classList.add('hidden');
 
         Timer.start(currentWorkoutPlan, {
             soundEnabled: settings.soundEnabled,
@@ -369,7 +423,7 @@
             elements.timerView.classList.remove('state-rest');
             if (data.isRunning) elements.timerDisplay.classList.add('vibrate');
         } else {
-            elements.stageText.textContent = 'System Release';
+            elements.stageText.textContent = data.isSetRest ? 'Set Rest' : 'Rest';
             elements.timerView.classList.add('state-rest');
             elements.timerDisplay.classList.remove('vibrate');
         }
@@ -419,7 +473,7 @@
         elements.completeProgress.textContent = `${completedCount}/3`;
 
         if (allDone) {
-            elements.completeMessage.textContent = '🎉 All exercises complete! Great job caring for your spine.';
+            elements.completeMessage.textContent = 'All exercises complete! Great job caring for your spine.';
         } else {
             const remaining = 3 - completedCount;
             elements.completeMessage.textContent = `${currentExercise.name} complete! ${remaining} more to go.`;
@@ -462,6 +516,7 @@
         if (finishBtn) {
             finishBtn.addEventListener('click', () => {
                 updateConsistencyCard();
+                updateLastSessionCard();
                 resetTodayProgress();
                 resetCompleteView();
 
@@ -487,6 +542,7 @@
         elements.exerciseList.classList.remove('hidden');
         elements.levelBar.classList.remove('hidden');
         document.getElementById('consistencyCard').classList.remove('hidden');
+        updateLastSessionCard();
         elements.exerciseName.textContent = 'McGill Big 3';
         elements.exerciseItems.forEach(item => item.classList.remove('active'));
     }
@@ -496,6 +552,7 @@
         elements.exerciseList.classList.remove('hidden');
         elements.levelBar.classList.remove('hidden');
         document.getElementById('consistencyCard').classList.remove('hidden');
+        updateLastSessionCard();
         elements.timerDisplay.classList.remove('vibrate');
         elements.timerView.classList.remove('state-rest');
         elements.tensionSleeve.style.height = '0%';
@@ -707,7 +764,7 @@
         const level = Exercises.getLevel(settings.level);
 
         const holdDuration = settings.customHoldDuration || level.holdDuration;
-        const restDuration = settings.customRestDuration || level.restDuration;
+        const restDuration = settings.customRestDuration || level.restBetweenReps || 10;
 
         elements.settingHold.value = holdDuration;
         elements.holdValue.textContent = `${holdDuration}s`;
