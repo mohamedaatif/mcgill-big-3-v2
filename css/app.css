@@ -4,11 +4,158 @@
 
 /* ===== Page Headers ===== */
 .page-header {
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-lg);
 }
 
 .page-header .label {
     margin-bottom: var(--space-sm);
+}
+
+/* ===== Level Bar ===== */
+.level-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--cable-steel);
+}
+
+.level-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: var(--bg-elevated);
+    border: 1px solid var(--cable-steel);
+    padding: var(--space-sm) var(--space-md);
+    cursor: pointer;
+    color: var(--text-main);
+    font-family: var(--font-main);
+}
+
+.level-badge:hover {
+    border-color: var(--cable-steel-light);
+}
+
+.level-badge .level-icon {
+    font-size: 1.25rem;
+}
+
+.level-badge .level-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.level-badge .level-desc {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+
+.bad-day-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+}
+
+.bad-day-toggle input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--tension-hold);
+}
+
+.bad-day-toggle .toggle-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+/* ===== Modal ===== */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: var(--space-lg);
+}
+
+.modal-content {
+    background: var(--bg-elevated);
+    border: 1px solid var(--cable-steel);
+    padding: var(--space-lg);
+    width: 100%;
+    max-width: 360px;
+}
+
+.modal-content h2 {
+    margin-bottom: var(--space-lg);
+    font-size: 1.25rem;
+}
+
+.level-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--cable-steel);
+    margin-bottom: var(--space-lg);
+}
+
+.level-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--bg);
+    border: none;
+    cursor: pointer;
+    color: var(--text-main);
+    font-family: var(--font-main);
+    text-align: left;
+}
+
+.level-option:hover {
+    background: var(--bg-elevated);
+}
+
+.level-option.active {
+    background: var(--bg-elevated);
+    border-left: 3px solid var(--tension-hold);
+}
+
+.level-option .level-icon {
+    font-size: 1.5rem;
+}
+
+.level-option .level-name {
+    font-weight: 600;
+    flex: 1;
+}
+
+.level-option .level-desc {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.modal-close {
+    width: 100%;
+}
+
+/* ===== Level Up Banner ===== */
+.level-up-banner {
+    margin-top: var(--space-xl);
+    padding: var(--space-lg);
+    background: var(--bg-elevated);
+    border: 1px solid var(--tension-hold);
+    text-align: center;
+}
+
+.level-up-banner p {
+    margin-bottom: var(--space-md);
+    font-weight: 600;
 }
 
 /* ===== Stat Cards ===== */

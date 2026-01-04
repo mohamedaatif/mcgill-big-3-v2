@@ -9,25 +9,41 @@
         navItems: document.querySelectorAll('.nav-item'),
         pages: document.querySelectorAll('.page'),
 
-        // Workout
+        // Workout - Level
+        levelBar: document.getElementById('levelBar'),
+        levelBadge: document.getElementById('levelBadge'),
+        badDayMode: document.getElementById('badDayMode'),
+        levelModal: document.getElementById('levelModal'),
+        levelOptions: document.getElementById('levelOptions'),
+        closeLevelModal: document.getElementById('closeLevelModal'),
+
+        // Workout - Exercise
         exerciseName: document.getElementById('exerciseName'),
         exerciseList: document.getElementById('exerciseList'),
         exerciseItems: document.querySelectorAll('.exercise-item'),
+
+        // Workout - Timer
         timerView: document.getElementById('timerView'),
         timerDisplay: document.getElementById('timerDisplay'),
         tensionSleeve: document.getElementById('tensionSleeve'),
         stageText: document.getElementById('stageText'),
         repCount: document.getElementById('repCount'),
         phaseLabel: document.getElementById('phaseLabel'),
+        sideLabel: document.getElementById('sideLabel'),
+        setLabel: document.getElementById('setLabel'),
         btnStart: document.getElementById('btnStart'),
         btnStop: document.getElementById('btnStop'),
 
         // Progress
         streakCount: document.getElementById('streakCount'),
         totalSessions: document.getElementById('totalSessions'),
+        levelSessions: document.getElementById('levelSessions'),
+        nextLevelIn: document.getElementById('nextLevelIn'),
         calendarGrid: document.getElementById('calendarGrid'),
         weekCount: document.getElementById('weekCount'),
         monthCount: document.getElementById('monthCount'),
+        levelUpBanner: document.getElementById('levelUpBanner'),
+        btnLevelUp: document.getElementById('btnLevelUp'),
 
         // Pain Log
         painGauge: document.getElementById('painGauge'),
@@ -41,6 +57,7 @@
 
     let currentExercise = null;
     let currentPainLevel = 5;
+    let currentWorkoutPlan = null;
 
     // ===== Navigation =====
     function initNavigation() {
@@ -59,9 +76,98 @@
         document.getElementById(`page-${pageId}`).classList.add('active');
         document.querySelector(`.nav-item[data-page="${pageId}"]`).classList.add('active');
 
-        // Refresh page data
         if (pageId === 'progress') updateProgressPage();
         if (pageId === 'pain') updatePainPage();
+    }
+
+    // ===== Level Management =====
+    function initLevelControls() {
+        // Level badge click opens modal
+        elements.levelBadge.addEventListener('click', showLevelModal);
+        elements.closeLevelModal.addEventListener('click', hideLevelModal);
+
+        // Bad day toggle
+        elements.badDayMode.addEventListener('change', () => {
+            Storage.setBadDayMode(elements.badDayMode.checked);
+            updateLevelDisplay();
+            updateExerciseMeta();
+        });
+
+        // Level up button
+        elements.btnLevelUp.addEventListener('click', () => {
+            const settings = Storage.getSettings();
+            const nextLevel = Exercises.getNextLevel(settings.level);
+            if (nextLevel) {
+                Storage.setLevel(nextLevel);
+                updateLevelDisplay();
+                updateExerciseMeta();
+                updateProgressPage();
+            }
+        });
+    }
+
+    function showLevelModal() {
+        const levels = Exercises.getAllLevels();
+        const settings = Storage.getSettings();
+
+        let html = '';
+        Object.values(levels).forEach(level => {
+            const isActive = level.id === settings.level ? 'active' : '';
+            html += `
+                <button class="level-option ${isActive}" data-level="${level.id}">
+                    <span class="level-icon">${level.icon}</span>
+                    <span class="level-name">${level.name}</span>
+                    <span class="level-desc">${level.description}</span>
+                </button>
+            `;
+        });
+
+        elements.levelOptions.innerHTML = html;
+
+        // Add click handlers
+        elements.levelOptions.querySelectorAll('.level-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                Storage.setLevel(btn.dataset.level);
+                updateLevelDisplay();
+                updateExerciseMeta();
+                hideLevelModal();
+            });
+        });
+
+        elements.levelModal.classList.remove('hidden');
+    }
+
+    function hideLevelModal() {
+        elements.levelModal.classList.add('hidden');
+    }
+
+    function updateLevelDisplay() {
+        const settings = Storage.getSettings();
+        const level = settings.badDayMode ?
+            Exercises.getBadDayLevel() :
+            Exercises.getLevel(settings.level);
+
+        elements.levelBadge.querySelector('.level-icon').textContent = level.icon;
+        elements.levelBadge.querySelector('.level-name').textContent = level.name;
+        elements.levelBadge.querySelector('.level-desc').textContent = level.description;
+
+        elements.badDayMode.checked = settings.badDayMode;
+    }
+
+    function updateExerciseMeta() {
+        const settings = Storage.getSettings();
+        const level = settings.badDayMode ?
+            Exercises.getBadDayLevel() :
+            Exercises.getLevel(settings.level);
+
+        const pyramidStr = level.pyramid.join('-');
+
+        document.querySelectorAll('.exercise-meta').forEach(el => {
+            const exerciseId = el.dataset.meta;
+            const exercise = Exercises.getExercise(exerciseId);
+            const suffix = exercise.bilateral ? ' (L+R)' : '';
+            el.textContent = `${pyramidStr} × ${level.holdDuration}s${suffix}`;
+        });
     }
 
     // ===== Workout Page =====
@@ -87,7 +193,7 @@
         currentExercise = Exercises.getExercise(exerciseId);
         const settings = Storage.getSettings();
 
-        // Update UI
+        // Update header
         elements.exerciseName.textContent = currentExercise.name;
 
         // Highlight selected
@@ -96,14 +202,22 @@
         });
 
         // Generate workout plan
-        const workoutPlan = Exercises.generateWorkoutPlan(exerciseId, settings);
+        currentWorkoutPlan = Exercises.generateWorkoutPlan(
+            exerciseId,
+            settings.level,
+            settings.badDayMode
+        );
 
-        // Show timer view
+        // Hide level bar, show timer
+        elements.levelBar.classList.add('hidden');
         elements.timerView.classList.remove('hidden');
         elements.exerciseList.classList.add('hidden');
 
         // Initialize timer
-        Timer.start(workoutPlan, {
+        Timer.start(currentWorkoutPlan, {
+            soundEnabled: settings.soundEnabled,
+            vibrationEnabled: settings.vibrationEnabled
+        }, {
             onTick: updateTimerUI,
             onPhaseChange: onPhaseChange,
             onStateChange: onStateChange,
@@ -113,22 +227,31 @@
     }
 
     function updateTimerUI(data) {
-        // Update timer display
+        // Timer display
         elements.timerDisplay.textContent = data.time.toString().padStart(2, '0');
 
-        // Update tension sleeve (fill height)
+        // Tension sleeve fill
         elements.tensionSleeve.style.height = `${data.progress}%`;
 
-        // Update rep count
-        const padNum = (n) => n.toString().padStart(2, '0');
-        elements.repCount.textContent = `${padNum(data.rep)} / ${padNum(data.totalReps)}`;
+        // Rep count
+        const pad = n => n.toString().padStart(2, '0');
+        elements.repCount.textContent = `${pad(data.rep)} / ${pad(data.totalReps)}`;
 
-        // Update phase
+        // Phase
         elements.phaseLabel.textContent = data.phase.toUpperCase();
 
-        // Update stage text
+        // Side
+        elements.sideLabel.textContent = data.side || '—';
+
+        // Set
+        const level = Storage.getSettings().badDayMode ?
+            Exercises.getBadDayLevel() :
+            Exercises.getLevel(Storage.getSettings().level);
+        elements.setLabel.textContent = `${data.set} / ${level.pyramid.length}`;
+
+        // Visual state
         if (data.phase === 'hold') {
-            elements.stageText.textContent = data.side ? `${data.side} Side` : 'Tension Loading';
+            elements.stageText.textContent = data.side ? `${data.side}` : 'Tension Loading';
             elements.timerView.classList.remove('state-rest');
             if (data.isRunning) {
                 elements.timerDisplay.classList.add('vibrate');
@@ -141,7 +264,7 @@
     }
 
     function onPhaseChange(step) {
-        // Could add sounds here
+        // Side announcement could go here
     }
 
     function onStateChange(state) {
@@ -157,8 +280,11 @@
         elements.btnStart.disabled = true;
 
         // Save workout
+        const settings = Storage.getSettings();
         Storage.saveWorkout({
             exercise: currentExercise.id,
+            level: settings.level,
+            badDay: settings.badDayMode,
             completed: true
         });
 
@@ -176,6 +302,7 @@
     function resetTimerView() {
         elements.timerView.classList.add('hidden');
         elements.exerciseList.classList.remove('hidden');
+        elements.levelBar.classList.remove('hidden');
         elements.timerDisplay.classList.remove('vibrate');
         elements.timerView.classList.remove('state-rest');
         elements.tensionSleeve.style.height = '0%';
@@ -191,33 +318,38 @@
 
     // ===== Progress Page =====
     function updateProgressPage() {
-        const workouts = Storage.getWorkouts();
+        const settings = Storage.getSettings();
         const streak = Storage.getStreak();
+        const total = Storage.getTotalSessions();
+        const levelSessions = Storage.getSessionsAtLevel(settings.level);
+        const level = Exercises.getLevel(settings.level);
 
         elements.streakCount.textContent = `${streak} day${streak !== 1 ? 's' : ''}`;
-        elements.totalSessions.textContent = workouts.length;
+        elements.totalSessions.textContent = total;
+        elements.levelSessions.textContent = levelSessions;
 
-        // Generate calendar
+        // Next level calculation
+        if (level.sessionsToAdvance) {
+            const remaining = Math.max(0, level.sessionsToAdvance - levelSessions);
+            elements.nextLevelIn.textContent = remaining > 0 ? `${remaining} sessions` : 'Ready!';
+        } else {
+            elements.nextLevelIn.textContent = '—';
+        }
+
+        // Level up banner
+        const suggestedLevel = Storage.shouldSuggestLevelUp();
+        if (suggestedLevel) {
+            elements.levelUpBanner.classList.remove('hidden');
+        } else {
+            elements.levelUpBanner.classList.add('hidden');
+        }
+
+        // Calendar
         generateCalendar();
 
-        // Week/month counts
-        const today = new Date();
-        const weekStart = new Date(today);
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-
-        let weekWorkouts = 0;
-        let monthWorkouts = 0;
-
-        workouts.forEach(w => {
-            const wDate = new Date(w.date);
-            if (wDate >= weekStart) weekWorkouts++;
-            if (wDate >= monthStart) monthWorkouts++;
-        });
-
-        elements.weekCount.textContent = `${weekWorkouts} / 7`;
-        elements.monthCount.textContent = `${monthWorkouts} / 28`;
+        // Week/month stats
+        elements.weekCount.textContent = `${Storage.getWeekStats()} / 7`;
+        elements.monthCount.textContent = `${Storage.getMonthStats()} / 28`;
     }
 
     function generateCalendar() {
@@ -261,9 +393,7 @@
         });
 
         elements.btnLogPain.addEventListener('click', () => {
-            Storage.savePainLog({
-                level: currentPainLevel
-            });
+            Storage.savePainLog({ level: currentPainLevel });
             updatePainHistory();
         });
     }
@@ -315,13 +445,16 @@
     // ===== Initialize =====
     function init() {
         initNavigation();
+        initLevelControls();
         initWorkoutPage();
         initPainPage();
+
+        updateLevelDisplay();
+        updateExerciseMeta();
         updateProgressPage();
         updatePainPage();
     }
 
-    // Start app when DOM ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

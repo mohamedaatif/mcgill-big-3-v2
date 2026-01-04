@@ -1,6 +1,6 @@
 /**
  * McGill Big 3 V2 - Timer Module
- * Taut Cable Chronometry style
+ * With audio cues, vibration, and phase management
  */
 
 const Timer = (function () {
@@ -11,17 +11,115 @@ const Timer = (function () {
         currentIndex: 0,
         timeLeft: 0,
         interval: null,
-        callbacks: {}
+        callbacks: {},
+        settings: {}
     };
 
-    function start(workoutPlan, callbacks) {
+    // Audio context for Web Audio API sounds
+    let audioContext = null;
+
+    function initAudio() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        // Resume if suspended (browser autoplay policy)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    }
+
+    // Play a tone with envelope
+    function playTone(frequency, duration = 150, type = 'sine', volume = 0.3) {
+        if (!state.settings.soundEnabled) return;
+        initAudio();
+
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        osc.type = type;
+        osc.frequency.value = frequency;
+
+        gain.gain.setValueAtTime(0, audioContext.currentTime);
+        gain.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration / 1000);
+
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc.start();
+        osc.stop(audioContext.currentTime + duration / 1000);
+    }
+
+    // Play chord (multiple frequencies)
+    function playChord(frequencies, duration = 200, volume = 0.15) {
+        frequencies.forEach(f => playTone(f, duration, 'sine', volume));
+    }
+
+    // ===== SOUND PATTERNS =====
+    const sounds = {
+        // HOLD phase - energizing, ascending
+        startHold: () => {
+            playTone(440, 100, 'sine', 0.25);
+            setTimeout(() => playTone(554, 100, 'sine', 0.25), 80);
+            setTimeout(() => playTone(659, 150, 'sine', 0.3), 160);
+        },
+
+        endHold: () => {
+            playTone(659, 100, 'sine', 0.2);
+            setTimeout(() => playTone(554, 100, 'sine', 0.2), 80);
+            setTimeout(() => playTone(440, 150, 'sine', 0.25), 160);
+        },
+
+        // REST phase - calming, soft
+        startRest: () => {
+            playChord([220, 277, 330], 300, 0.1);
+        },
+
+        // Countdown beeps - escalating
+        countdown3: () => playTone(600, 80, 'sine', 0.2),
+        countdown2: () => playTone(700, 100, 'sine', 0.25),
+        countdown1: () => playTone(800, 120, 'sine', 0.3),
+        countdown0: () => playChord([523, 659, 784], 200, 0.3),
+
+        // Progress
+        repComplete: () => {
+            playTone(523, 60, 'sine', 0.15);
+            setTimeout(() => playTone(659, 80, 'sine', 0.2), 50);
+        },
+
+        workoutComplete: () => {
+            playChord([523, 659, 784], 150, 0.2);
+            setTimeout(() => playChord([587, 740, 880], 150, 0.25), 150);
+            setTimeout(() => playChord([659, 831, 988], 300, 0.3), 300);
+        }
+    };
+
+    // ===== VIBRATION PATTERNS =====
+    function vibrate(pattern) {
+        if (!state.settings.vibrationEnabled) return;
+        if (navigator.vibrate) {
+            navigator.vibrate(pattern);
+        }
+    }
+
+    const vibrations = {
+        startHold: () => vibrate([100, 50, 100]),
+        endHold: () => vibrate([80, 40, 80]),
+        startRest: () => vibrate([50]),
+        countdown: () => vibrate([30]),
+        repComplete: () => vibrate([40, 30, 40]),
+        workoutComplete: () => vibrate([100, 50, 100, 50, 200])
+    };
+
+    // ===== TIMER CONTROL =====
+    function start(workoutPlan, settings, callbacks) {
         state.plan = workoutPlan;
         state.currentIndex = 0;
         state.callbacks = callbacks;
         state.isRunning = false;
         state.isPaused = false;
+        state.settings = settings;
 
-        // Set initial time
         const current = getCurrentStep();
         state.timeLeft = current.duration;
 
@@ -38,17 +136,22 @@ const Timer = (function () {
     }
 
     function resume() {
+        initAudio(); // Ensure audio context is ready
         state.isRunning = true;
         state.isPaused = false;
 
+        // Play phase start sound
+        const current = getCurrentStep();
+        if (current.type === 'hold') {
+            sounds.startHold();
+            vibrations.startHold();
+        } else {
+            sounds.startRest();
+            vibrations.startRest();
+        }
+
         state.interval = setInterval(() => {
-            state.timeLeft -= 0.1;
-
-            if (state.timeLeft <= 0) {
-                nextStep();
-            }
-
-            updateUI();
+            tick();
         }, 100);
 
         if (state.callbacks.onStateChange) {
@@ -76,11 +179,49 @@ const Timer = (function () {
         }
     }
 
+    function tick() {
+        const prevTime = Math.ceil(state.timeLeft);
+        state.timeLeft -= 0.1;
+        const newTime = Math.ceil(state.timeLeft);
+
+        // Countdown sounds on whole seconds
+        if (prevTime !== newTime && newTime > 0 && newTime <= 3) {
+            if (newTime === 3) {
+                sounds.countdown3();
+                vibrations.countdown();
+            } else if (newTime === 2) {
+                sounds.countdown2();
+                vibrations.countdown();
+            } else if (newTime === 1) {
+                sounds.countdown1();
+                vibrations.countdown();
+            }
+        }
+
+        if (state.timeLeft <= 0) {
+            nextStep();
+        }
+
+        updateUI();
+    }
+
     function nextStep() {
+        const prevStep = getCurrentStep();
+
+        // Play transition sound
+        if (prevStep.type === 'hold') {
+            sounds.endHold();
+            vibrations.endHold();
+            sounds.repComplete();
+            vibrations.repComplete();
+        }
+
         state.currentIndex++;
 
         if (state.currentIndex >= state.plan.plan.length) {
             // Workout complete
+            sounds.workoutComplete();
+            vibrations.workoutComplete();
             pause();
             if (state.callbacks.onComplete) {
                 state.callbacks.onComplete();
@@ -90,6 +231,15 @@ const Timer = (function () {
 
         const current = getCurrentStep();
         state.timeLeft = current.duration;
+
+        // Play new phase sound
+        if (current.type === 'hold') {
+            sounds.startHold();
+            vibrations.startHold();
+        } else {
+            sounds.startRest();
+            vibrations.startRest();
+        }
 
         if (state.callbacks.onPhaseChange) {
             state.callbacks.onPhaseChange(current);

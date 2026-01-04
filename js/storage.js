@@ -1,15 +1,27 @@
 /**
  * McGill Big 3 V2 - Storage Module
- * Simple localStorage wrapper for MVP
+ * localStorage wrapper with settings and progression tracking
  */
 
-const Storage = (function() {
+const Storage = (function () {
     const KEYS = {
-        WORKOUTS: 'mcgill_workouts',
-        PAIN_LOGS: 'mcgill_pain_logs',
-        SETTINGS: 'mcgill_settings'
+        WORKOUTS: 'mcgill_v2_workouts',
+        PAIN_LOGS: 'mcgill_v2_pain_logs',
+        SETTINGS: 'mcgill_v2_settings'
     };
 
+    // Default settings
+    const DEFAULT_SETTINGS = {
+        level: 'standard',
+        badDayMode: false,
+        soundEnabled: true,
+        vibrationEnabled: true,
+        // Custom overrides (null = use level defaults)
+        customHoldDuration: null,
+        customRestDuration: null
+    };
+
+    // ===== Workouts =====
     function getWorkouts() {
         const data = localStorage.getItem(KEYS.WORKOUTS);
         return data ? JSON.parse(data) : [];
@@ -23,12 +35,19 @@ const Storage = (function() {
             id: Date.now()
         });
         localStorage.setItem(KEYS.WORKOUTS, JSON.stringify(workouts));
+        return workouts.length;
     }
 
     function getWorkoutsForDate(dateStr) {
         return getWorkouts().filter(w => w.date.startsWith(dateStr));
     }
 
+    function getTodayWorkouts() {
+        const today = new Date().toISOString().split('T')[0];
+        return getWorkoutsForDate(today);
+    }
+
+    // ===== Pain Logs =====
     function getPainLogs() {
         const data = localStorage.getItem(KEYS.PAIN_LOGS);
         return data ? JSON.parse(data) : [];
@@ -44,20 +63,29 @@ const Storage = (function() {
         localStorage.setItem(KEYS.PAIN_LOGS, JSON.stringify(logs));
     }
 
+    // ===== Settings =====
     function getSettings() {
         const data = localStorage.getItem(KEYS.SETTINGS);
-        return data ? JSON.parse(data) : {
-            holdDuration: 10,
-            restDuration: 5,
-            repPattern: [5, 3, 1]
-        };
+        const saved = data ? JSON.parse(data) : {};
+        return { ...DEFAULT_SETTINGS, ...saved };
     }
 
     function saveSettings(settings) {
-        localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
+        const current = getSettings();
+        const updated = { ...current, ...settings };
+        localStorage.setItem(KEYS.SETTINGS, JSON.stringify(updated));
+        return updated;
     }
 
-    // Calculate streak
+    function setLevel(levelId) {
+        return saveSettings({ level: levelId });
+    }
+
+    function setBadDayMode(enabled) {
+        return saveSettings({ badDayMode: enabled });
+    }
+
+    // ===== Progression Stats =====
     function getStreak() {
         const workouts = getWorkouts();
         if (workouts.length === 0) return 0;
@@ -70,9 +98,9 @@ const Storage = (function() {
             const checkDate = new Date(today);
             checkDate.setDate(checkDate.getDate() - i);
             const dateStr = checkDate.toISOString().split('T')[0];
-            
+
             const hasWorkout = workouts.some(w => w.date.startsWith(dateStr));
-            
+
             if (hasWorkout) {
                 streak++;
             } else if (i > 0) {
@@ -83,14 +111,64 @@ const Storage = (function() {
         return streak;
     }
 
+    function getSessionsAtLevel(levelId) {
+        const workouts = getWorkouts();
+        return workouts.filter(w => w.level === levelId).length;
+    }
+
+    function getTotalSessions() {
+        return getWorkouts().length;
+    }
+
+    function getWeekStats() {
+        const workouts = getWorkouts();
+        const today = new Date();
+        const weekStart = new Date(today);
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+
+        return workouts.filter(w => new Date(w.date) >= weekStart).length;
+    }
+
+    function getMonthStats() {
+        const workouts = getWorkouts();
+        const today = new Date();
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        return workouts.filter(w => new Date(w.date) >= monthStart).length;
+    }
+
+    // Check if should suggest level up
+    function shouldSuggestLevelUp() {
+        const settings = getSettings();
+        const level = Exercises.getLevel(settings.level);
+
+        if (!level.sessionsToAdvance) return null;
+
+        const sessionsAtLevel = getSessionsAtLevel(settings.level);
+        if (sessionsAtLevel >= level.sessionsToAdvance) {
+            return Exercises.getNextLevel(settings.level);
+        }
+
+        return null;
+    }
+
     return {
         getWorkouts,
         saveWorkout,
         getWorkoutsForDate,
+        getTodayWorkouts,
         getPainLogs,
         savePainLog,
         getSettings,
         saveSettings,
-        getStreak
+        setLevel,
+        setBadDayMode,
+        getStreak,
+        getSessionsAtLevel,
+        getTotalSessions,
+        getWeekStats,
+        getMonthStats,
+        shouldSuggestLevelUp
     };
 })();
