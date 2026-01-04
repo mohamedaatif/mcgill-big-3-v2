@@ -1,5 +1,6 @@
 /**
  * McGill Big 3 V2 - Main App Controller
+ * Complete implementation with all V1 features
  */
 
 (function () {
@@ -8,6 +9,15 @@
         // Navigation
         navItems: document.querySelectorAll('.nav-item'),
         pages: document.querySelectorAll('.page'),
+        settingsFab: document.getElementById('settingsFab'),
+
+        // Workout - Header
+        greeting: document.getElementById('greeting'),
+        exerciseName: document.getElementById('exerciseName'),
+
+        // Workout - Consistency
+        weeklyScore: document.getElementById('weeklyScore'),
+        consistencyFill: document.getElementById('consistencyFill'),
 
         // Workout - Level
         levelBar: document.getElementById('levelBar'),
@@ -18,7 +28,6 @@
         closeLevelModal: document.getElementById('closeLevelModal'),
 
         // Workout - Exercise
-        exerciseName: document.getElementById('exerciseName'),
         exerciseList: document.getElementById('exerciseList'),
         exerciseItems: document.querySelectorAll('.exercise-item'),
 
@@ -33,6 +42,19 @@
         setLabel: document.getElementById('setLabel'),
         btnStart: document.getElementById('btnStart'),
         btnStop: document.getElementById('btnStop'),
+
+        // Workout - Complete
+        workoutComplete: document.getElementById('workoutComplete'),
+        completeMessage: document.getElementById('completeMessage'),
+        completeDuration: document.getElementById('completeDuration'),
+        completeProgress: document.getElementById('completeProgress'),
+        completeActions: document.getElementById('completeActions'),
+
+        // Workout - Instructions Modal
+        instructionsModal: document.getElementById('instructionsModal'),
+        instructionsTitle: document.getElementById('instructionsTitle'),
+        instructionsBody: document.getElementById('instructionsBody'),
+        closeInstructions: document.getElementById('closeInstructions'),
 
         // Progress
         streakCount: document.getElementById('streakCount'),
@@ -52,12 +74,55 @@
         painUp: document.getElementById('painUp'),
         painDown: document.getElementById('painDown'),
         btnLogPain: document.getElementById('btnLogPain'),
-        painHistory: document.getElementById('painHistory')
+        painHistory: document.getElementById('painHistory'),
+        symptomGrid: document.getElementById('symptomGrid'),
+        locationGrid: document.getElementById('locationGrid'),
+
+        // Settings
+        settingHold: document.getElementById('settingHold'),
+        settingRest: document.getElementById('settingRest'),
+        settingSound: document.getElementById('settingSound'),
+        settingVibration: document.getElementById('settingVibration'),
+        holdValue: document.getElementById('holdValue'),
+        restValue: document.getElementById('restValue'),
+        btnResetSettings: document.getElementById('btnResetSettings')
     };
 
     let currentExercise = null;
     let currentPainLevel = 5;
     let currentWorkoutPlan = null;
+    let workoutStartTime = null;
+    let todayProgress = {};
+    let selectedSymptoms = [];
+    let selectedLocation = null;
+
+    // ===== Initialization =====
+    function init() {
+        updateGreeting();
+        initNavigation();
+        initLevelControls();
+        initWorkoutPage();
+        initPainPage();
+        initSettingsPage();
+        initInstructionsModal();
+
+        updateLevelDisplay();
+        updateExerciseMeta();
+        updateConsistencyCard();
+        updateProgressPage();
+        updatePainPage();
+        loadSettings();
+        resetTodayProgress();
+    }
+
+    // ===== Greeting =====
+    function updateGreeting() {
+        const hour = new Date().getHours();
+        let greeting = 'Good evening';
+        if (hour < 12) greeting = 'Good morning';
+        else if (hour < 17) greeting = 'Good afternoon';
+        elements.greeting.textContent = greeting;
+    }
 
     // ===== Navigation =====
     function initNavigation() {
@@ -67,6 +132,10 @@
                 showPage(page);
             });
         });
+
+        elements.settingsFab.addEventListener('click', () => {
+            showPage('settings');
+        });
     }
 
     function showPage(pageId) {
@@ -74,26 +143,46 @@
         elements.navItems.forEach(n => n.classList.remove('active'));
 
         document.getElementById(`page-${pageId}`).classList.add('active');
-        document.querySelector(`.nav-item[data-page="${pageId}"]`).classList.add('active');
+        const navItem = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+        if (navItem) navItem.classList.add('active');
 
         if (pageId === 'progress') updateProgressPage();
         if (pageId === 'pain') updatePainPage();
+        if (pageId === 'settings') loadSettings();
+    }
+
+    // ===== Consistency Card =====
+    function updateConsistencyCard() {
+        const weekStats = Storage.getWeekStats();
+        const percentage = (weekStats / 7) * 100;
+        elements.weeklyScore.textContent = `${weekStats}/7`;
+        elements.consistencyFill.style.width = `${percentage}%`;
+    }
+
+    // ===== Today Progress Tracking =====
+    function resetTodayProgress() {
+        todayProgress = {
+            'curl-up': false,
+            'side-plank': false,
+            'bird-dog': false
+        };
+    }
+
+    function getCompletedCount() {
+        return Object.values(todayProgress).filter(v => v).length;
     }
 
     // ===== Level Management =====
     function initLevelControls() {
-        // Level badge click opens modal
         elements.levelBadge.addEventListener('click', showLevelModal);
         elements.closeLevelModal.addEventListener('click', hideLevelModal);
 
-        // Bad day toggle
         elements.badDayMode.addEventListener('change', () => {
             Storage.setBadDayMode(elements.badDayMode.checked);
             updateLevelDisplay();
             updateExerciseMeta();
         });
 
-        // Level up button
         elements.btnLevelUp.addEventListener('click', () => {
             const settings = Storage.getSettings();
             const nextLevel = Exercises.getNextLevel(settings.level);
@@ -124,7 +213,6 @@
 
         elements.levelOptions.innerHTML = html;
 
-        // Add click handlers
         elements.levelOptions.querySelectorAll('.level-option').forEach(btn => {
             btn.addEventListener('click', () => {
                 Storage.setLevel(btn.dataset.level);
@@ -170,6 +258,45 @@
         });
     }
 
+    // ===== Exercise Instructions Modal =====
+    function initInstructionsModal() {
+        document.querySelectorAll('[data-info]').forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const exerciseId = icon.dataset.info;
+                showInstructions(exerciseId);
+            });
+        });
+
+        elements.closeInstructions.addEventListener('click', () => {
+            elements.instructionsModal.classList.add('hidden');
+        });
+    }
+
+    function showInstructions(exerciseId) {
+        const exercise = Exercises.getExercise(exerciseId);
+        if (!exercise) return;
+
+        elements.instructionsTitle.textContent = exercise.name;
+
+        let html = '<ol class="instructions-list">';
+        exercise.instructions.forEach(step => {
+            html += `<li>${step}</li>`;
+        });
+        html += '</ol>';
+
+        if (exercise.tips && exercise.tips.length > 0) {
+            html += '<p class="tips-label">Tips</p><ul class="tips-list">';
+            exercise.tips.forEach(tip => {
+                html += `<li>${tip}</li>`;
+            });
+            html += '</ul>';
+        }
+
+        elements.instructionsBody.innerHTML = html;
+        elements.instructionsModal.classList.remove('hidden');
+    }
+
     // ===== Workout Page =====
     function initWorkoutPage() {
         elements.exerciseItems.forEach(item => {
@@ -192,28 +319,25 @@
     function selectExercise(exerciseId) {
         currentExercise = Exercises.getExercise(exerciseId);
         const settings = Storage.getSettings();
+        workoutStartTime = Date.now();
 
-        // Update header
         elements.exerciseName.textContent = currentExercise.name;
 
-        // Highlight selected
         elements.exerciseItems.forEach(item => {
             item.classList.toggle('active', item.dataset.exercise === exerciseId);
         });
 
-        // Generate workout plan
         currentWorkoutPlan = Exercises.generateWorkoutPlan(
             exerciseId,
             settings.level,
             settings.badDayMode
         );
 
-        // Hide level bar, show timer
         elements.levelBar.classList.add('hidden');
         elements.timerView.classList.remove('hidden');
         elements.exerciseList.classList.add('hidden');
+        document.getElementById('consistencyCard').classList.add('hidden');
 
-        // Initialize timer
         Timer.start(currentWorkoutPlan, {
             soundEnabled: settings.soundEnabled,
             vibrationEnabled: settings.vibrationEnabled
@@ -227,35 +351,23 @@
     }
 
     function updateTimerUI(data) {
-        // Timer display
         elements.timerDisplay.textContent = data.time.toString().padStart(2, '0');
-
-        // Tension sleeve fill
         elements.tensionSleeve.style.height = `${data.progress}%`;
 
-        // Rep count
         const pad = n => n.toString().padStart(2, '0');
         elements.repCount.textContent = `${pad(data.rep)} / ${pad(data.totalReps)}`;
-
-        // Phase
         elements.phaseLabel.textContent = data.phase.toUpperCase();
-
-        // Side
         elements.sideLabel.textContent = data.side || '—';
 
-        // Set
         const level = Storage.getSettings().badDayMode ?
             Exercises.getBadDayLevel() :
             Exercises.getLevel(Storage.getSettings().level);
         elements.setLabel.textContent = `${data.set} / ${level.pyramid.length}`;
 
-        // Visual state
         if (data.phase === 'hold') {
             elements.stageText.textContent = data.side ? `${data.side}` : 'Tension Loading';
             elements.timerView.classList.remove('state-rest');
-            if (data.isRunning) {
-                elements.timerDisplay.classList.add('vibrate');
-            }
+            if (data.isRunning) elements.timerDisplay.classList.add('vibrate');
         } else {
             elements.stageText.textContent = 'System Release';
             elements.timerView.classList.add('state-rest');
@@ -263,21 +375,25 @@
         }
     }
 
-    function onPhaseChange(step) {
-        // Side announcement could go here
-    }
+    function onPhaseChange(step) { }
 
     function onStateChange(state) {
         elements.btnStart.textContent = state.isRunning ? 'Pause' : 'Resume';
-        if (!state.isRunning) {
-            elements.timerDisplay.classList.remove('vibrate');
-        }
+        if (!state.isRunning) elements.timerDisplay.classList.remove('vibrate');
     }
 
     function onWorkoutComplete() {
         elements.timerDisplay.classList.remove('vibrate');
-        elements.btnStart.textContent = 'Complete!';
-        elements.btnStart.disabled = true;
+
+        // Calculate duration
+        const duration = Math.round((Date.now() - workoutStartTime) / 1000);
+        const mins = Math.floor(duration / 60);
+        const secs = duration % 60;
+
+        // Mark complete
+        todayProgress[currentExercise.id] = true;
+        const completedCount = getCompletedCount();
+        const allDone = completedCount === 3;
 
         // Save workout
         const settings = Storage.getSettings();
@@ -288,32 +404,106 @@
             completed: true
         });
 
-        // Mark exercise as done
+        // Update UI
         const item = document.querySelector(`.exercise-item[data-exercise="${currentExercise.id}"]`);
         if (item) {
             item.classList.add('done');
             item.querySelector('.exercise-status').textContent = '✓';
         }
 
-        // Auto-reset after 2 seconds
-        setTimeout(resetTimerView, 2000);
+        // Show complete screen
+        elements.timerView.classList.add('hidden');
+        elements.workoutComplete.classList.remove('hidden');
+
+        elements.completeDuration.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        elements.completeProgress.textContent = `${completedCount}/3`;
+
+        if (allDone) {
+            elements.completeMessage.textContent = '🎉 All exercises complete! Great job caring for your spine.';
+        } else {
+            const remaining = 3 - completedCount;
+            elements.completeMessage.textContent = `${currentExercise.name} complete! ${remaining} more to go.`;
+        }
+
+        // Action buttons
+        let actionsHtml = '';
+        if (allDone) {
+            actionsHtml = `
+                <button class="btn btn-primary" id="btnFinishSession">Finish Session</button>
+                <button class="btn btn-secondary" id="btnLogPainAfter">Log Pain Level</button>
+            `;
+        } else {
+            const exercises = ['curl-up', 'side-plank', 'bird-dog'];
+            const nextId = exercises.find(id => !todayProgress[id]);
+            const nextEx = nextId ? Exercises.getExercise(nextId) : null;
+
+            actionsHtml = `
+                <button class="btn btn-primary" id="btnContinue" data-next="${nextId}">Continue: ${nextEx?.name}</button>
+                <button class="btn btn-secondary" id="btnBackToList">Back to List</button>
+            `;
+        }
+        elements.completeActions.innerHTML = actionsHtml;
+
+        // Attach handlers
+        const continueBtn = document.getElementById('btnContinue');
+        if (continueBtn) {
+            continueBtn.addEventListener('click', () => {
+                resetCompleteView();
+                selectExercise(continueBtn.dataset.next);
+            });
+        }
+
+        const backBtn = document.getElementById('btnBackToList');
+        if (backBtn) {
+            backBtn.addEventListener('click', resetCompleteView);
+        }
+
+        const finishBtn = document.getElementById('btnFinishSession');
+        if (finishBtn) {
+            finishBtn.addEventListener('click', () => {
+                updateConsistencyCard();
+                resetTodayProgress();
+                resetCompleteView();
+
+                // Reset exercise status icons
+                elements.exerciseItems.forEach(item => {
+                    item.classList.remove('done');
+                    item.querySelector('.exercise-status').textContent = '—';
+                });
+            });
+        }
+
+        const logPainBtn = document.getElementById('btnLogPainAfter');
+        if (logPainBtn) {
+            logPainBtn.addEventListener('click', () => {
+                resetCompleteView();
+                showPage('pain');
+            });
+        }
+    }
+
+    function resetCompleteView() {
+        elements.workoutComplete.classList.add('hidden');
+        elements.exerciseList.classList.remove('hidden');
+        elements.levelBar.classList.remove('hidden');
+        document.getElementById('consistencyCard').classList.remove('hidden');
+        elements.exerciseName.textContent = 'McGill Big 3';
+        elements.exerciseItems.forEach(item => item.classList.remove('active'));
     }
 
     function resetTimerView() {
         elements.timerView.classList.add('hidden');
         elements.exerciseList.classList.remove('hidden');
         elements.levelBar.classList.remove('hidden');
+        document.getElementById('consistencyCard').classList.remove('hidden');
         elements.timerDisplay.classList.remove('vibrate');
         elements.timerView.classList.remove('state-rest');
         elements.tensionSleeve.style.height = '0%';
         elements.timerDisplay.textContent = '10';
         elements.btnStart.textContent = 'Initiate';
         elements.btnStart.disabled = false;
-        elements.exerciseName.textContent = 'Select Exercise';
-
-        elements.exerciseItems.forEach(item => {
-            item.classList.remove('active');
-        });
+        elements.exerciseName.textContent = 'McGill Big 3';
+        elements.exerciseItems.forEach(item => item.classList.remove('active'));
     }
 
     // ===== Progress Page =====
@@ -328,26 +518,18 @@
         elements.totalSessions.textContent = total;
         elements.levelSessions.textContent = levelSessions;
 
-        // Next level calculation
         if (level.sessionsToAdvance) {
             const remaining = Math.max(0, level.sessionsToAdvance - levelSessions);
-            elements.nextLevelIn.textContent = remaining > 0 ? `${remaining} sessions` : 'Ready!';
+            elements.nextLevelIn.textContent = remaining > 0 ? `${remaining}` : 'Ready!';
         } else {
             elements.nextLevelIn.textContent = '—';
         }
 
-        // Level up banner
         const suggestedLevel = Storage.shouldSuggestLevelUp();
-        if (suggestedLevel) {
-            elements.levelUpBanner.classList.remove('hidden');
-        } else {
-            elements.levelUpBanner.classList.add('hidden');
-        }
+        elements.levelUpBanner.classList.toggle('hidden', !suggestedLevel);
 
-        // Calendar
         generateCalendar();
 
-        // Week/month stats
         elements.weekCount.textContent = `${Storage.getWeekStats()} / 7`;
         elements.monthCount.textContent = `${Storage.getMonthStats()} / 28`;
     }
@@ -392,8 +574,41 @@
             }
         });
 
+        // Symptom buttons
+        elements.symptomGrid.querySelectorAll('.symptom-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+                const symptom = btn.dataset.symptom;
+                if (selectedSymptoms.includes(symptom)) {
+                    selectedSymptoms = selectedSymptoms.filter(s => s !== symptom);
+                } else {
+                    selectedSymptoms.push(symptom);
+                }
+            });
+        });
+
+        // Location buttons
+        elements.locationGrid.querySelectorAll('.location-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                elements.locationGrid.querySelectorAll('.location-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedLocation = btn.dataset.location;
+            });
+        });
+
         elements.btnLogPain.addEventListener('click', () => {
-            Storage.savePainLog({ level: currentPainLevel });
+            Storage.savePainLog({
+                level: currentPainLevel,
+                symptoms: [...selectedSymptoms],
+                location: selectedLocation
+            });
+
+            // Reset selections
+            selectedSymptoms = [];
+            selectedLocation = null;
+            elements.symptomGrid.querySelectorAll('.symptom-btn').forEach(b => b.classList.remove('active'));
+            elements.locationGrid.querySelectorAll('.location-btn').forEach(b => b.classList.remove('active'));
+
             updatePainHistory();
         });
     }
@@ -428,12 +643,16 @@
             });
 
             const levelClass = log.level <= 3 ? 'low' : log.level >= 7 ? 'high' : '';
+            const symptoms = log.symptoms ? log.symptoms.join(', ') : '';
+            const location = log.location ? log.location.replace('-', ' ') : '';
+            const details = [symptoms, location].filter(Boolean).join(' • ');
 
             html += `
                 <div class="history-item">
                     <div class="history-level ${levelClass}">${log.level}</div>
                     <div class="history-info">
                         <div class="history-date">${dateStr}</div>
+                        ${details ? `<div class="history-notes">${details}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -442,19 +661,63 @@
         elements.painHistory.innerHTML = html;
     }
 
-    // ===== Initialize =====
-    function init() {
-        initNavigation();
-        initLevelControls();
-        initWorkoutPage();
-        initPainPage();
+    // ===== Settings Page =====
+    function initSettingsPage() {
+        elements.settingHold.addEventListener('input', (e) => {
+            elements.holdValue.textContent = `${e.target.value}s`;
+        });
 
-        updateLevelDisplay();
-        updateExerciseMeta();
-        updateProgressPage();
-        updatePainPage();
+        elements.settingHold.addEventListener('change', (e) => {
+            Storage.saveSettings({ customHoldDuration: parseInt(e.target.value) });
+        });
+
+        elements.settingRest.addEventListener('input', (e) => {
+            elements.restValue.textContent = `${e.target.value}s`;
+        });
+
+        elements.settingRest.addEventListener('change', (e) => {
+            Storage.saveSettings({ customRestDuration: parseInt(e.target.value) });
+        });
+
+        elements.settingSound.addEventListener('change', (e) => {
+            Storage.saveSettings({ soundEnabled: e.target.checked });
+        });
+
+        elements.settingVibration.addEventListener('change', (e) => {
+            Storage.saveSettings({ vibrationEnabled: e.target.checked });
+        });
+
+        elements.btnResetSettings.addEventListener('click', () => {
+            Storage.saveSettings({
+                level: 'standard',
+                badDayMode: false,
+                soundEnabled: true,
+                vibrationEnabled: true,
+                customHoldDuration: null,
+                customRestDuration: null
+            });
+            loadSettings();
+            updateLevelDisplay();
+            updateExerciseMeta();
+        });
     }
 
+    function loadSettings() {
+        const settings = Storage.getSettings();
+        const level = Exercises.getLevel(settings.level);
+
+        const holdDuration = settings.customHoldDuration || level.holdDuration;
+        const restDuration = settings.customRestDuration || level.restDuration;
+
+        elements.settingHold.value = holdDuration;
+        elements.holdValue.textContent = `${holdDuration}s`;
+        elements.settingRest.value = restDuration;
+        elements.restValue.textContent = `${restDuration}s`;
+        elements.settingSound.checked = settings.soundEnabled !== false;
+        elements.settingVibration.checked = settings.vibrationEnabled !== false;
+    }
+
+    // ===== Initialize =====
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

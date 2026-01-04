@@ -518,3 +518,223 @@
     font-size: 0.875rem;
     color: var(--text-main);
 }
+
+/* ===== Consistency Card ===== */
+.consistency-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--cable-steel);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.consistency-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+}
+
+.consistency-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+}
+
+.consistency-score {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--tension-hold);
+}
+
+.consistency-bar {
+    height: 4px;
+    background: var(--cable-steel);
+}
+
+.consistency-fill {
+    height: 100%;
+    background: var(--tension-hold);
+    transition: width var(--transition-base);
+}
+
+/* ===== Settings FAB ===== */
+.settings-fab {
+    position: fixed;
+    top: var(--space-md);
+    right: var(--space-md);
+    width: 44px;
+    height: 44px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--cable-steel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50;
+}
+
+.settings-fab svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-dim);
+}
+
+.settings-fab:hover svg {
+    stroke: var(--text-main);
+}
+
+/* ===== Workout Complete ===== */
+.workout-complete {
+    text-align: center;
+    padding: var(--space-xl) 0;
+}
+
+.complete-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-md);
+}
+
+.complete-title {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-sm);
+}
+
+.complete-message {
+    color: var(--text-dim);
+    margin-bottom: var(--space-xl);
+}
+
+.complete-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.complete-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* ===== Instructions Modal ===== */
+.instructions-list {
+    list-style: decimal;
+    padding-left: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.instructions-list li {
+    margin-bottom: var(--space-sm);
+    color: var(--text-main);
+    line-height: 1.5;
+}
+
+.tips-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: var(--space-sm);
+}
+
+.tips-list {
+    list-style: disc;
+    padding-left: var(--space-lg);
+}
+
+.tips-list li {
+    margin-bottom: var(--space-xs);
+    color: var(--text-dim);
+    font-size: 0.875rem;
+}
+
+/* ===== Symptom & Location Buttons ===== */
+.symptom-grid,
+.location-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.symptom-btn,
+.location-btn {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--cable-steel);
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--font-main);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.symptom-btn.active,
+.location-btn.active {
+    background: var(--tension-hold);
+    color: var(--bg);
+}
+
+/* ===== Settings Page ===== */
+.settings-section {
+    border-top: 1px solid var(--cable-steel);
+    padding: var(--space-lg) 0;
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+}
+
+.setting-name {
+    font-size: 0.875rem;
+    color: var(--text-main);
+}
+
+.setting-slider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.setting-slider input[type="range"] {
+    width: 120px;
+    accent-color: var(--tension-hold);
+}
+
+.slider-value {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--tension-hold);
+    min-width: 40px;
+    text-align: right;
+}
+
+.toggle-input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--tension-hold);
+}
+
+.app-version {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    padding: var(--space-xl) 0;
+}
+
+/* ===== Exercise Icon Clickable ===== */
+.exercise-icon[data-info] {
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.exercise-icon[data-info]:hover {
+    transform: scale(1.2);
+}
