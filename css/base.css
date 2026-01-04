@@ -1,0 +1,170 @@
+/* =====================================================
+   McGill Big 3 V2 - Base Styles
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    font-weight: 400;
+    line-height: 1.5;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Typography ===== */
+h1,
+h2,
+h3 {
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-main);
+}
+
+h1 {
+    font-size: 2.4rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+}
+
+h3 {
+    font-size: 1.125rem;
+}
+
+.label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+}
+
+.mono {
+    font-family: var(--font-mono);
+}
+
+/* ===== Layout ===== */
+#app {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.page {
+    display: none;
+    flex: 1;
+    padding: var(--space-lg);
+    padding-bottom: 100px;
+}
+
+.page.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== Cable System Background ===== */
+.cable-system {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    display: flex;
+    justify-content: space-around;
+    padding: 0 10%;
+    pointer-events: none;
+}
+
+.cable {
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom,
+            transparent,
+            var(--cable-steel) 20%,
+            var(--cable-steel) 80%,
+            transparent);
+    opacity: 0.2;
+}
+
+/* ===== Bottom Navigation ===== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: var(--bg);
+    border-top: 1px solid var(--cable-steel);
+    display: flex;
+    z-index: 100;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: color var(--transition-base);
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.nav-item svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    fill: none;
+}
+
+.nav-item.active {
+    color: var(--tension-hold);
+}
+
+.nav-item:hover {
+    color: var(--text-main);
+}
+
+/* ===== Utility ===== */
+.hidden {
+    display: none !important;
+}
+
+.text-hold {
+    color: var(--tension-hold);
+}
+
+.text-rest {
+    color: var(--tension-rest);
+}

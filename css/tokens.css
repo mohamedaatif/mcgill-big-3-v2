@@ -1,0 +1,40 @@
+/* =====================================================
+   McGill Big 3 V2 - Design Tokens
+   Taut Cable Chronometry Design System
+   ===================================================== */
+
+:root {
+    /* Core Colors */
+    --bg: #0a0b0d;
+    --bg-elevated: #12141a;
+    --cable-steel: #2a2d34;
+    --cable-steel-light: #3a3f4a;
+    
+    /* Tension States */
+    --tension-hold: #ff9d00;
+    --tension-hold-glow: rgba(255, 157, 0, 0.3);
+    --tension-rest: #00e5ff;
+    --tension-rest-glow: rgba(0, 229, 255, 0.3);
+    
+    /* Text */
+    --text-main: #f0f0f0;
+    --text-dim: #5c626e;
+    --text-muted: #3a3f4a;
+    
+    /* Typography */
+    --font-main: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+    
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 40px;
+    --space-2xl: 60px;
+    
+    /* Transitions */
+    --transition-fast: 100ms ease;
+    --transition-base: 200ms ease;
+    --transition-slow: 400ms ease;
+}

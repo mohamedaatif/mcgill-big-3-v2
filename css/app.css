@@ -1,0 +1,373 @@
+/* =====================================================
+   McGill Big 3 V2 - Component Styles
+   ===================================================== */
+
+/* ===== Page Headers ===== */
+.page-header {
+    margin-bottom: var(--space-xl);
+}
+
+.page-header .label {
+    margin-bottom: var(--space-sm);
+}
+
+/* ===== Stat Cards ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+}
+
+.stat-card {
+    border-top: 1px solid var(--cable-steel);
+    padding-top: var(--space-md);
+}
+
+.stat-card .label {
+    margin-bottom: var(--space-xs);
+}
+
+.stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* ===== Cable Gauge (Timer) ===== */
+.cable-gauge {
+    position: relative;
+    height: 280px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.cable-core {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    background: #15171a;
+    box-shadow: inset 0 0 10px #000;
+}
+
+.tension-sleeve {
+    width: 100%;
+    background: var(--tension-hold);
+    height: 0%;
+    transition: height 0.1s linear, background var(--transition-slow), box-shadow var(--transition-slow);
+    position: relative;
+    box-shadow: 0 0 30px var(--tension-hold-glow);
+}
+
+.tension-sleeve::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #fff;
+    box-shadow: 0 0 15px #fff;
+}
+
+.state-rest .tension-sleeve {
+    background: var(--tension-rest);
+    box-shadow: 0 0 30px var(--tension-rest-glow);
+}
+
+.timer-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-mono);
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    z-index: 10;
+    pointer-events: none;
+    mix-blend-mode: difference;
+}
+
+.stage-indicator {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Vibrate animation for HOLD phase */
+.vibrate {
+    animation: vibrate 0.1s infinite;
+}
+
+@keyframes vibrate {
+    0% {
+        transform: translate(-50%, -50%) translate(1px, 1px);
+    }
+
+    25% {
+        transform: translate(-50%, -50%) translate(-1px, -1px);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) translate(1px, -1px);
+    }
+
+    75% {
+        transform: translate(-50%, -50%) translate(-1px, 1px);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) translate(1px, 1px);
+    }
+}
+
+/* ===== Buttons ===== */
+.btn {
+    font-family: var(--font-main);
+    font-weight: 800;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: var(--space-md) var(--space-lg);
+    border: none;
+    cursor: pointer;
+    transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-primary {
+    background: var(--text-main);
+    color: var(--bg);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--cable-steel);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    border-color: var(--cable-steel-light);
+}
+
+.controls {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+.controls .btn-primary {
+    flex: 2;
+}
+
+.controls .btn-secondary {
+    flex: 1;
+}
+
+/* ===== Exercise List ===== */
+.exercise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--cable-steel);
+    margin-bottom: var(--space-lg);
+}
+
+.exercise-item {
+    background: var(--bg);
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.exercise-item:hover {
+    background: var(--bg-elevated);
+}
+
+.exercise-item.active {
+    background: var(--bg-elevated);
+    border-left: 3px solid var(--tension-hold);
+}
+
+.exercise-item.done {
+    opacity: 0.5;
+}
+
+.exercise-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    text-align: center;
+}
+
+.exercise-info {
+    flex: 1;
+}
+
+.exercise-name {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.exercise-meta {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+}
+
+.exercise-status {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+/* ===== Calendar Grid ===== */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: var(--space-md);
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    background: var(--cable-steel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+
+.calendar-day.complete {
+    background: var(--tension-hold);
+    color: var(--bg);
+}
+
+.calendar-day.partial {
+    background: var(--cable-steel-light);
+}
+
+.calendar-day.today {
+    border: 1px solid var(--text-main);
+}
+
+/* ===== Pain Slider ===== */
+.pain-gauge {
+    position: relative;
+    height: 200px;
+    width: 60px;
+    margin: 0 auto var(--space-lg);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--cable-steel);
+}
+
+.pain-fill {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(to top, var(--tension-rest), var(--tension-hold));
+    height: 50%;
+    transition: height var(--transition-base);
+}
+
+.pain-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    mix-blend-mode: difference;
+}
+
+.pain-controls {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.pain-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    background: var(--cable-steel);
+    border: none;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+/* ===== History List ===== */
+.history-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.history-item {
+    border-top: 1px solid var(--cable-steel);
+    padding: var(--space-md) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.history-level {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.25rem;
+    background: var(--cable-steel);
+}
+
+.history-level.low {
+    background: var(--tension-rest);
+    color: var(--bg);
+}
+
+.history-level.high {
+    background: var(--tension-hold);
+    color: var(--bg);
+}
+
+.history-info {
+    flex: 1;
+}
+
+.history-date {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+}
+
+.history-notes {
+    font-size: 0.875rem;
+    color: var(--text-main);
+}
