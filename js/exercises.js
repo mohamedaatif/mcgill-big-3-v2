@@ -4,24 +4,37 @@
  */
 
 const Exercises = (function () {
-    // SVG Icons (professional, minimal)
+    // SVG Icons - Consistent design language:
+    // - 24x24 viewBox
+    // - stroke-width: 2
+    // - stroke-linecap: round
+    // - stroke-linejoin: round
+    // - Anatomically accurate poses
     const ICONS = {
-        'curl-up': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 18c-4 0-6-3-6-6s2-6 6-6"/>
-            <path d="M12 6v12"/>
-            <circle cx="12" cy="4" r="2"/>
+        // Curl-Up: Person lying on back, knees bent, upper body slightly lifted
+        'curl-up': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="8" r="2.5"/>
+            <path d="M15.5 9.5L12 12L4 14"/>
+            <path d="M12 12L8 18"/>
+            <path d="M4 14L2 20"/>
         </svg>`,
-        'side-plank': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 20l8-8"/>
-            <path d="M12 12l8 4"/>
-            <circle cx="16" cy="8" r="2"/>
-            <path d="M4 20h4"/>
+
+        // Side Plank: Person on side, body elevated on elbow, straight line
+        'side-plank': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="19" cy="6" r="2.5"/>
+            <path d="M17 8L10 12L3 16"/>
+            <path d="M3 16L3 22"/>
+            <path d="M10 12L10 8"/>
         </svg>`,
-        'bird-dog': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 14h6"/>
-            <path d="M14 14h6"/>
-            <path d="M10 14l2-6 2 6"/>
-            <circle cx="12" cy="6" r="2"/>
+
+        // Bird-Dog: Person on all fours, opposite arm and leg extended
+        'bird-dog': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="10" r="2"/>
+            <path d="M10 11L14 13"/>
+            <path d="M14 13L14 20"/>
+            <path d="M14 13L18 15L18 20"/>
+            <path d="M10 11L6 13L6 18"/>
+            <path d="M14 13L20 10"/>
         </svg>`
     };
 
