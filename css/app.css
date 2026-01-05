@@ -315,6 +315,11 @@
     border-color: var(--cable-steel-light);
 }
 
+.btn-sm {
+    padding: var(--space-xs) var(--space-md);
+    font-size: 0.75rem;
+}
+
 .btn-tertiary {
     background: transparent;
     border: 1px solid var(--cable-steel);

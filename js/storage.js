@@ -153,6 +153,17 @@ const Storage = (function () {
         return null;
     }
 
+    // Export all data as JSON object
+    function exportAllData() {
+        return {
+            exportDate: new Date().toISOString(),
+            version: '2.0',
+            workouts: getWorkouts(),
+            painLogs: getPainLogs(),
+            settings: getSettings()
+        };
+    }
+
     return {
         getWorkouts,
         saveWorkout,
@@ -169,6 +180,7 @@ const Storage = (function () {
         getTotalSessions,
         getWeekStats,
         getMonthStats,
-        shouldSuggestLevelUp
+        shouldSuggestLevelUp,
+        exportAllData
     };
 })();

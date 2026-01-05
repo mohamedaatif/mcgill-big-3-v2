@@ -103,6 +103,7 @@
         settingVibration: document.getElementById('settingVibration'),
         holdValue: document.getElementById('holdValue'),
         restValue: document.getElementById('restValue'),
+        btnExportData: document.getElementById('btnExportData'),
         btnResetSettings: document.getElementById('btnResetSettings')
     };
 
@@ -885,6 +886,21 @@
             loadSettings();
             updateLevelDisplay();
             updateExerciseMeta();
+        });
+
+        elements.btnExportData.addEventListener('click', () => {
+            const data = Storage.exportAllData();
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mcgill-big3-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
     }
 
