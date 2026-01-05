@@ -315,6 +315,18 @@
     border-color: var(--cable-steel-light);
 }
 
+.btn-tertiary {
+    background: transparent;
+    border: 1px solid var(--cable-steel);
+    color: var(--text-dim);
+    font-size: 0.8rem;
+}
+
+.btn-tertiary:hover {
+    color: var(--text-main);
+    border-color: var(--tension-hold);
+}
+
 .controls {
     display: flex;
     gap: var(--space-md);
@@ -323,6 +335,10 @@
 
 .controls .btn-primary {
     flex: 2;
+}
+
+.controls .btn-tertiary {
+    flex: 1;
 }
 
 .controls .btn-secondary {

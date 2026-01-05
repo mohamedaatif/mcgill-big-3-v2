@@ -48,6 +48,7 @@
         sideLabel: document.getElementById('sideLabel'),
         setLabel: document.getElementById('setLabel'),
         btnStart: document.getElementById('btnStart'),
+        btnSkip: document.getElementById('btnSkip'),
         btnStop: document.getElementById('btnStop'),
 
         // Workout - Complete
@@ -102,6 +103,7 @@
     let todayProgress = {};
     let selectedSymptoms = [];
     let selectedLocation = null;
+    let skippedReps = []; // Track skipped reps for current workout
 
     // ===== Initialization =====
     function init() {
@@ -363,6 +365,10 @@
             Timer.toggle();
         });
 
+        elements.btnSkip.addEventListener('click', () => {
+            Timer.skip();
+        });
+
         elements.btnStop.addEventListener('click', () => {
             Timer.stop();
             resetTimerView();
@@ -373,6 +379,7 @@
         currentExercise = Exercises.getExercise(exerciseId);
         const settings = Storage.getSettings();
         workoutStartTime = Date.now();
+        skippedReps = []; // Reset skipped reps for new exercise
 
         elements.exerciseName.textContent = currentExercise.name;
 
@@ -400,8 +407,13 @@
             onPhaseChange: onPhaseChange,
             onStateChange: onStateChange,
             onComplete: onWorkoutComplete,
-            onStop: resetTimerView
+            onStop: resetTimerView,
+            onSkip: onRepSkipped
         });
+    }
+
+    function onRepSkipped(data) {
+        skippedReps.push(data);
     }
 
     function updateTimerUI(data) {
@@ -462,13 +474,20 @@
         const completedCount = getCompletedCount();
         const allDone = completedCount === 3;
 
-        // Save workout
+        // Calculate actual vs planned reps
+        const plannedReps = currentWorkoutPlan.totalHolds;
+        const actualReps = plannedReps - skippedReps.length;
+
+        // Save workout with skip data
         const settings = Storage.getSettings();
         Storage.saveWorkout({
             exercise: currentExercise.id,
             level: settings.level,
             badDay: settings.badDayMode,
-            completed: true
+            completed: true,
+            plannedReps,
+            actualReps,
+            skippedReps: skippedReps.length
         });
 
         // Update UI
@@ -485,12 +504,19 @@
         elements.completeDuration.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
         elements.completeProgress.textContent = `${completedCount}/3`;
 
+        // Build complete message
+        let message = '';
+        if (skippedReps.length > 0) {
+            message = `${currentExercise.name}: ${actualReps}/${plannedReps} reps completed. `;
+        }
+
         if (allDone) {
-            elements.completeMessage.textContent = 'All exercises complete! Great job caring for your spine.';
+            message += 'All exercises complete! Great job caring for your spine.';
         } else {
             const remaining = 3 - completedCount;
-            elements.completeMessage.textContent = `${currentExercise.name} complete! ${remaining} more to go.`;
+            message += `${remaining} exercise${remaining > 1 ? 's' : ''} to go.`;
         }
+        elements.completeMessage.textContent = message;
 
         // Action buttons
         let actionsHtml = '';

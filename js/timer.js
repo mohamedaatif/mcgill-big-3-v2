@@ -321,6 +321,27 @@ const Timer = (function () {
         return state.plan.plan[state.currentIndex];
     }
 
+    // Skip current rep (marks as incomplete)
+    function skip() {
+        const current = getCurrentStep();
+
+        // Only skip during hold phase
+        if (current.type !== 'hold') return;
+
+        // Notify that this rep was skipped
+        if (state.callbacks.onSkip) {
+            state.callbacks.onSkip({
+                set: current.set,
+                rep: current.rep,
+                side: current.side
+            });
+        }
+
+        // Move to next step
+        nextStep();
+        updateUI();
+    }
+
     function updateUI() {
         const current = getCurrentStep();
         const total = current.duration;
@@ -354,6 +375,7 @@ const Timer = (function () {
         resume,
         pause,
         stop,
+        skip,
         getProgress,
         getCurrentStep
     };
