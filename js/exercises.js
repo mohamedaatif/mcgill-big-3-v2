@@ -4,37 +4,35 @@
  */
 
 const Exercises = (function () {
-    // SVG Icons - Consistent design language:
-    // - 24x24 viewBox
-    // - stroke-width: 2
-    // - stroke-linecap: round
-    // - stroke-linejoin: round
-    // - Anatomically accurate poses
+    // SVG Icons - Consistent design language
+    // stroke="currentColor" inherits orange from CSS
     const ICONS = {
-        // Curl-Up: Person lying on back, knees bent, upper body slightly lifted
+        // Curl-Up: Person lying on back, upper body curled up
         'curl-up': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="18" cy="8" r="2.5"/>
-            <path d="M15.5 9.5L12 12L4 14"/>
-            <path d="M12 12L8 18"/>
-            <path d="M4 14L2 20"/>
+            <circle cx="5" cy="16" r="2.5"/>
+            <path d="M7 18.5c1.5 0 3 .5 5 1.5"/>
+            <path d="M12 20h10"/>
+            <path d="M12 20l4-6l4 6"/>
+            <path d="M8 20h4"/>
         </svg>`,
 
-        // Side Plank: Person on side, body elevated on elbow, straight line
+        // Side Plank: Person on side, body elevated, arm extended up
         'side-plank': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="19" cy="6" r="2.5"/>
-            <path d="M17 8L10 12L3 16"/>
-            <path d="M3 16L3 22"/>
-            <path d="M10 12L10 8"/>
+            <circle cx="18" cy="6" r="2.5"/>
+            <path d="M16 8l-6 4"/>
+            <path d="M10 12L4 16"/>
+            <path d="M4 16v5"/>
+            <path d="M10 12l-2-6"/>
         </svg>`,
 
         // Bird-Dog: Person on all fours, opposite arm and leg extended
         'bird-dog': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="8" cy="10" r="2"/>
-            <path d="M10 11L14 13"/>
-            <path d="M14 13L14 20"/>
-            <path d="M14 13L18 15L18 20"/>
-            <path d="M10 11L6 13L6 18"/>
-            <path d="M14 13L20 10"/>
+            <circle cx="17.5" cy="11.5" r="2.5"/>
+            <path d="M9 14h7"/>
+            <path d="M9 14v6"/>
+            <path d="M16 14v6"/>
+            <path d="M9 14L3 12"/>
+            <path d="M16 14l6-2"/>
         </svg>`
     };
 
