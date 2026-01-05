@@ -18,10 +18,9 @@ const Exercises = (function () {
 
         // Side Plank: Person in plank on forearm
         'side-plank': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="4" cy="12" r="2.5"/>
-            <path d="M7 14l12 4"/>
-            <path d="M7 14l-4 2"/>
-            <path d="M7 14v4h4"/>
+            <circle cx="5" cy="12" r="2"/>
+            <path d="M8 14l12 3"/>
+            <path d="M8 14l-1 3h-3"/>
         </svg>`,
 
         // Bird-Dog: Person on all fours, opposite arm and leg extended
