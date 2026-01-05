@@ -34,6 +34,16 @@
         levelOptions: document.getElementById('levelOptions'),
         closeLevelModal: document.getElementById('closeLevelModal'),
 
+        // Workout - Custom Pyramid
+        btnCustomPyramid: document.getElementById('btnCustomPyramid'),
+        customPyramidModal: document.getElementById('customPyramidModal'),
+        pyramidSet1: document.getElementById('pyramidSet1'),
+        pyramidSet2: document.getElementById('pyramidSet2'),
+        pyramidSet3: document.getElementById('pyramidSet3'),
+        pyramidHold: document.getElementById('pyramidHold'),
+        applyCustomPyramid: document.getElementById('applyCustomPyramid'),
+        closeCustomPyramid: document.getElementById('closeCustomPyramid'),
+
         // Workout - Exercise
         exerciseList: document.getElementById('exerciseList'),
         exerciseItems: document.querySelectorAll('.exercise-item'),
@@ -104,6 +114,7 @@
     let selectedSymptoms = [];
     let selectedLocation = null;
     let skippedReps = []; // Track skipped reps for current workout
+    let customPyramid = null; // { pyramid: [5,3,1], holdDuration: 10 }
 
     // ===== Initialization =====
     function init() {
@@ -111,6 +122,7 @@
         initNavigation();
         initExerciseIcons();
         initLevelControls();
+        initCustomPyramid();
         initWorkoutPage();
         initPainPage();
         initSettingsPage();
@@ -285,6 +297,71 @@
         elements.levelModal.classList.add('hidden');
     }
 
+    // ===== Custom Pyramid =====
+    function initCustomPyramid() {
+        elements.btnCustomPyramid.addEventListener('click', showCustomPyramidModal);
+        elements.closeCustomPyramid.addEventListener('click', hideCustomPyramidModal);
+        elements.applyCustomPyramid.addEventListener('click', applyCustomPyramid);
+    }
+
+    function showCustomPyramidModal() {
+        // Pre-fill with current values
+        const settings = Storage.getSettings();
+        const level = Exercises.getLevel(settings.level);
+
+        if (customPyramid) {
+            // Use existing custom pyramid
+            elements.pyramidSet1.value = customPyramid.pyramid[0] || 0;
+            elements.pyramidSet2.value = customPyramid.pyramid[1] || 0;
+            elements.pyramidSet3.value = customPyramid.pyramid[2] || 0;
+            elements.pyramidHold.value = customPyramid.holdDuration;
+        } else {
+            // Use level defaults
+            elements.pyramidSet1.value = level.pyramid[0] || 0;
+            elements.pyramidSet2.value = level.pyramid[1] || 0;
+            elements.pyramidSet3.value = level.pyramid[2] || 0;
+            elements.pyramidHold.value = settings.customHoldDuration || level.holdDuration;
+        }
+
+        elements.customPyramidModal.classList.remove('hidden');
+    }
+
+    function hideCustomPyramidModal() {
+        elements.customPyramidModal.classList.add('hidden');
+    }
+
+    function applyCustomPyramid() {
+        const set1 = parseInt(elements.pyramidSet1.value) || 0;
+        const set2 = parseInt(elements.pyramidSet2.value) || 0;
+        const set3 = parseInt(elements.pyramidSet3.value) || 0;
+        const hold = parseInt(elements.pyramidHold.value) || 10;
+
+        // Build pyramid array (filter out zeros)
+        const pyramid = [set1, set2, set3].filter(n => n > 0);
+
+        if (pyramid.length === 0) {
+            pyramid.push(1); // Minimum 1 rep
+        }
+
+        customPyramid = { pyramid, holdDuration: hold };
+
+        // Update button to show it's active
+        elements.btnCustomPyramid.classList.add('active');
+        elements.btnCustomPyramid.textContent = pyramid.join('-') + ' × ' + hold + 's';
+
+        // Update exercise meta display
+        updateExerciseMeta();
+
+        hideCustomPyramidModal();
+    }
+
+    function clearCustomPyramid() {
+        customPyramid = null;
+        elements.btnCustomPyramid.classList.remove('active');
+        elements.btnCustomPyramid.textContent = 'Custom';
+        updateExerciseMeta();
+    }
+
     function updateLevelDisplay() {
         const settings = Storage.getSettings();
         const level = settings.badDayMode ?
@@ -303,13 +380,18 @@
             Exercises.getBadDayLevel() :
             Exercises.getLevel(settings.level);
 
-        const pyramidStr = level.pyramid.join('-');
+        // Use custom pyramid if set, otherwise level defaults
+        const pyramid = customPyramid ? customPyramid.pyramid : level.pyramid;
+        const holdDuration = customPyramid ? customPyramid.holdDuration :
+            (settings.customHoldDuration || level.holdDuration);
+
+        const pyramidStr = pyramid.join('-');
 
         document.querySelectorAll('.exercise-meta').forEach(el => {
             const exerciseId = el.dataset.meta;
             const exercise = Exercises.getExercise(exerciseId);
             const suffix = exercise.bilateral ? ' (L+R)' : '';
-            el.textContent = `${pyramidStr} × ${level.holdDuration}s${suffix}`;
+            el.textContent = `${pyramidStr} × ${holdDuration}s${suffix}`;
         });
     }
 
@@ -387,14 +469,18 @@
             item.classList.toggle('active', item.dataset.exercise === exerciseId);
         });
 
+        // Build options for workout generation
+        const options = {
+            customHoldDuration: customPyramid ? customPyramid.holdDuration : settings.customHoldDuration,
+            customRestDuration: settings.customRestDuration,
+            customPyramid: customPyramid ? customPyramid.pyramid : null
+        };
+
         currentWorkoutPlan = Exercises.generateWorkoutPlan(
             exerciseId,
             settings.level,
             settings.badDayMode,
-            {
-                customHoldDuration: settings.customHoldDuration,
-                customRestDuration: settings.customRestDuration
-            }
+            options
         );
 
         elements.levelBar.classList.add('hidden');

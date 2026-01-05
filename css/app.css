@@ -825,3 +825,114 @@
 .exercise-icon[data-info]:hover {
     transform: scale(1.2);
 }
+
+/* ===== Custom Pyramid =====  */
+.btn-custom-pyramid {
+    padding: var(--space-xs) var(--space-md);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: transparent;
+    border: 1px solid var(--cable-steel);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-custom-pyramid:hover,
+.btn-custom-pyramid.active {
+    border-color: var(--tension-hold);
+    color: var(--tension-hold);
+}
+
+.modal-hint {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: var(--space-lg);
+}
+
+.pyramid-inputs {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.pyramid-input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.pyramid-input-group label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+}
+
+.pyramid-input-group input {
+    width: 100%;
+    padding: var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    text-align: center;
+    background: var(--bg);
+    border: 1px solid var(--cable-steel);
+    color: var(--text-main);
+}
+
+.pyramid-input-group input:focus {
+    outline: none;
+    border-color: var(--tension-hold);
+}
+
+.pyramid-hold-group {
+    margin-bottom: var(--space-lg);
+}
+
+.pyramid-hold-group label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: var(--space-xs);
+}
+
+.pyramid-hold-input {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.pyramid-hold-input input {
+    width: 80px;
+    padding: var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    text-align: center;
+    background: var(--bg);
+    border: 1px solid var(--cable-steel);
+    color: var(--text-main);
+}
+
+.pyramid-hold-input input:focus {
+    outline: none;
+    border-color: var(--tension-hold);
+}
+
+.pyramid-hold-input span {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.modal-actions .btn {
+    flex: 1;
+}

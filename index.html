@@ -71,6 +71,7 @@
                     <span class="level-name">Standard</span>
                     <span class="level-desc">5-3-1 × 10s</span>
                 </button>
+                <button class="btn-custom-pyramid" id="btnCustomPyramid">Custom</button>
                 <label class="bad-day-toggle">
                     <input type="checkbox" id="badDayMode">
                     <span class="toggle-label">Bad Day</span>
@@ -182,6 +183,39 @@
                     <h2 id="instructionsTitle">Exercise</h2>
                     <div class="instructions-body" id="instructionsBody"></div>
                     <button class="btn btn-primary modal-close" id="closeInstructions">Got It</button>
+                </div>
+            </div>
+
+            <!-- Custom Pyramid Modal -->
+            <div class="modal hidden" id="customPyramidModal">
+                <div class="modal-content">
+                    <h2>Custom Pyramid</h2>
+                    <p class="modal-hint">Set reps per set (e.g., 5-3-1)</p>
+                    <div class="pyramid-inputs">
+                        <div class="pyramid-input-group">
+                            <label>Set 1</label>
+                            <input type="number" id="pyramidSet1" min="1" max="20" value="5">
+                        </div>
+                        <div class="pyramid-input-group">
+                            <label>Set 2</label>
+                            <input type="number" id="pyramidSet2" min="0" max="20" value="3">
+                        </div>
+                        <div class="pyramid-input-group">
+                            <label>Set 3</label>
+                            <input type="number" id="pyramidSet3" min="0" max="20" value="1">
+                        </div>
+                    </div>
+                    <div class="pyramid-hold-group">
+                        <label>Hold Duration</label>
+                        <div class="pyramid-hold-input">
+                            <input type="number" id="pyramidHold" min="1" max="60" value="10">
+                            <span>seconds</span>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" id="applyCustomPyramid">Apply</button>
+                        <button class="btn btn-secondary" id="closeCustomPyramid">Cancel</button>
+                    </div>
                 </div>
             </div>
         </section>
