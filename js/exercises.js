@@ -16,13 +16,12 @@ const Exercises = (function () {
             <path d="M8 20h4"/>
         </svg>`,
 
-        // Side Plank: Person on side, body elevated, arm extended up
+        // Side Plank: Person in plank on forearm
         'side-plank': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="18" cy="6" r="2.5"/>
-            <path d="M16 8l-6 4"/>
-            <path d="M10 12L4 16"/>
-            <path d="M4 16v5"/>
-            <path d="M10 12l-2-6"/>
+            <circle cx="4" cy="12" r="2.5"/>
+            <path d="M7 14l12 4"/>
+            <path d="M7 14l-4 2"/>
+            <path d="M7 14v4h4"/>
         </svg>`,
 
         // Bird-Dog: Person on all fours, opposite arm and leg extended
