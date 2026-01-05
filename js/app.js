@@ -499,12 +499,21 @@
             onStateChange: onStateChange,
             onComplete: onWorkoutComplete,
             onStop: resetTimerView,
-            onSkip: onRepSkipped
+            onSkip: onRepSkipped,
+            onSideSwitch: onSideSwitch
         });
     }
 
     function onRepSkipped(data) {
         skippedReps.push(data);
+    }
+
+    function onSideSwitch(newSide) {
+        // Flash the side indicator to draw attention
+        elements.sideLabel.classList.add('side-flash');
+        setTimeout(() => {
+            elements.sideLabel.classList.remove('side-flash');
+        }, 600);
     }
 
     function updateTimerUI(data) {

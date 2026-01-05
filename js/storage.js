@@ -111,13 +111,22 @@ const Storage = (function () {
         return streak;
     }
 
+    // Helper: get unique dates from workout array
+    function getUniqueDates(workouts) {
+        const dates = new Set();
+        workouts.forEach(w => {
+            dates.add(w.date.split('T')[0]); // Get just YYYY-MM-DD
+        });
+        return dates;
+    }
+
     function getSessionsAtLevel(levelId) {
-        const workouts = getWorkouts();
-        return workouts.filter(w => w.level === levelId).length;
+        const workouts = getWorkouts().filter(w => w.level === levelId);
+        return getUniqueDates(workouts).size; // Count unique days
     }
 
     function getTotalSessions() {
-        return getWorkouts().length;
+        return getUniqueDates(getWorkouts()).size; // Count unique days
     }
 
     function getWeekStats() {
@@ -127,7 +136,8 @@ const Storage = (function () {
         weekStart.setDate(weekStart.getDate() - weekStart.getDay());
         weekStart.setHours(0, 0, 0, 0);
 
-        return workouts.filter(w => new Date(w.date) >= weekStart).length;
+        const weekWorkouts = workouts.filter(w => new Date(w.date) >= weekStart);
+        return getUniqueDates(weekWorkouts).size; // Count unique days
     }
 
     function getMonthStats() {
@@ -135,7 +145,8 @@ const Storage = (function () {
         const today = new Date();
         const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
-        return workouts.filter(w => new Date(w.date) >= monthStart).length;
+        const monthWorkouts = workouts.filter(w => new Date(w.date) >= monthStart);
+        return getUniqueDates(monthWorkouts).size; // Count unique days
     }
 
     // Check if should suggest level up

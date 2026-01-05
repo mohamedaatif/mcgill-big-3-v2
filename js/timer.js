@@ -104,6 +104,12 @@ const Timer = (function () {
             playChord([523, 659, 784], 150, 0.2);
             setTimeout(() => playChord([587, 740, 880], 150, 0.25), 150);
             setTimeout(() => playChord([659, 831, 988], 300, 0.3), 300);
+        },
+
+        // Side switch - distinct ascending two-tone
+        switchSides: () => {
+            playTone(392, 100, 'triangle', 0.25);  // G4
+            setTimeout(() => playTone(523, 150, 'triangle', 0.3), 100);  // C5
         }
     };
 
@@ -121,7 +127,8 @@ const Timer = (function () {
         startRest: () => vibrate([50]),
         countdown: () => vibrate([30]),
         repComplete: () => vibrate([40, 30, 40]),
-        workoutComplete: () => vibrate([100, 50, 100, 50, 200])
+        workoutComplete: () => vibrate([100, 50, 100, 50, 200]),
+        switchSides: () => vibrate([150, 100, 150])  // Distinct pattern for side switch
     };
 
     // ===== TIMER CONTROL =====
@@ -315,6 +322,19 @@ const Timer = (function () {
 
         const current = getCurrentStep();
         state.timeLeft = current.duration;
+
+        // Check for side switch on bilateral exercises
+        const sideChanged = prevStep.side && current.side && prevStep.side !== current.side;
+
+        if (sideChanged && current.type === 'rest') {
+            // Side is switching - play distinct feedback
+            sounds.switchSides();
+            vibrations.switchSides();
+
+            if (state.callbacks.onSideSwitch) {
+                state.callbacks.onSideSwitch(current.side);
+            }
+        }
 
         // Play new phase sound
         if (current.type === 'hold') {
