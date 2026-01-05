@@ -390,7 +390,11 @@
         currentWorkoutPlan = Exercises.generateWorkoutPlan(
             exerciseId,
             settings.level,
-            settings.badDayMode
+            settings.badDayMode,
+            {
+                customHoldDuration: settings.customHoldDuration,
+                customRestDuration: settings.customRestDuration
+            }
         );
 
         elements.levelBar.classList.add('hidden');

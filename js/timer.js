@@ -17,14 +17,27 @@ const Timer = (function () {
 
     // Audio context for Web Audio API sounds
     let audioContext = null;
+    let audioUnlocked = false;
 
     function initAudio() {
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
+
         // Resume if suspended (browser autoplay policy)
         if (audioContext.state === 'suspended') {
             audioContext.resume();
+        }
+
+        // iOS requires playing a sound during user interaction to unlock audio
+        if (!audioUnlocked && audioContext.state === 'running') {
+            // Play a silent buffer to unlock audio on iOS
+            const buffer = audioContext.createBuffer(1, 1, 22050);
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start(0);
+            audioUnlocked = true;
         }
     }
 

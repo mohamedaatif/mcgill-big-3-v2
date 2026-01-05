@@ -199,15 +199,20 @@ const Exercises = (function () {
      * Uses proper rest durations:
      * - restBetweenReps: short rest after each hold
      * - restBetweenSets: longer rest between pyramid sets
+     * @param {object} options - Optional overrides { customHoldDuration, customRestDuration }
      */
-    function generateWorkoutPlan(exerciseId, levelId, isBadDay = false) {
+    function generateWorkoutPlan(exerciseId, levelId, isBadDay = false, options = {}) {
         const exercise = exercises[exerciseId];
         const level = isBadDay ? BAD_DAY_LEVEL : getLevel(levelId);
 
         if (!exercise) return null;
 
         const plan = [];
-        const { pyramid, holdDuration, restBetweenReps, restBetweenSets } = level;
+        const { pyramid, restBetweenSets } = level;
+
+        // Use custom durations if provided, otherwise use level defaults
+        const holdDuration = options.customHoldDuration || level.holdDuration;
+        const restBetweenReps = options.customRestDuration || level.restBetweenReps;
 
         if (exercise.bilateral) {
             pyramid.forEach((reps, setIndex) => {
