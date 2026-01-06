@@ -323,10 +323,10 @@ const Timer = (function () {
         const current = getCurrentStep();
         state.timeLeft = current.duration;
 
-        // Check for side switch on bilateral exercises
+        // Check for side switch on bilateral exercises (when starting new side's hold)
         const sideChanged = prevStep.side && current.side && prevStep.side !== current.side;
 
-        if (sideChanged && current.type === 'rest') {
+        if (sideChanged && current.type === 'hold') {
             // Side is switching - play distinct feedback
             sounds.switchSides();
             vibrations.switchSides();
@@ -338,7 +338,10 @@ const Timer = (function () {
 
         // Play new phase sound
         if (current.type === 'hold') {
-            sounds.startHold();
+            // Don't play startHold if we just played switchSides
+            if (!sideChanged) {
+                sounds.startHold();
+            }
             vibrations.startHold();
         } else {
             sounds.startRest();
