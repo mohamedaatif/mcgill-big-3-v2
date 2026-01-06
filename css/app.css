@@ -962,3 +962,102 @@
 .modal-actions .btn {
     flex: 1;
 }
+
+/* ===== Levels Editor ===== */
+.setting-hint {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: var(--space-md);
+}
+
+.levels-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.level-card {
+    background: var(--cable-steel);
+    padding: var(--space-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.level-card:hover {
+    background: var(--cable-steel-light);
+}
+
+.level-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.level-card-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.level-card-desc {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.level-card-body {
+    display: none;
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--bg);
+}
+
+.level-card.expanded .level-card-body {
+    display: block;
+}
+
+.level-inputs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.level-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.level-input-group label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+}
+
+.level-input-group input {
+    width: 100%;
+    padding: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    text-align: center;
+    background: var(--bg);
+    border: 1px solid var(--cable-steel);
+    color: var(--text-main);
+}
+
+.level-input-group input:focus {
+    outline: none;
+    border-color: var(--tension-hold);
+}
+
+.level-card-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.level-card-actions .btn {
+    flex: 1;
+    font-size: 0.75rem;
+    padding: var(--space-xs) var(--space-sm);
+}

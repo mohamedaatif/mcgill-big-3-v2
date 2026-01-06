@@ -7,7 +7,8 @@ const Storage = (function () {
     const KEYS = {
         WORKOUTS: 'mcgill_v2_workouts',
         PAIN_LOGS: 'mcgill_v2_pain_logs',
-        SETTINGS: 'mcgill_v2_settings'
+        SETTINGS: 'mcgill_v2_settings',
+        CUSTOM_LEVELS: 'mcgill_v2_custom_levels'
     };
 
     // Default settings
@@ -83,6 +84,23 @@ const Storage = (function () {
 
     function setBadDayMode(enabled) {
         return saveSettings({ badDayMode: enabled });
+    }
+
+    // ===== Custom Levels =====
+    function getCustomLevels() {
+        const data = localStorage.getItem(KEYS.CUSTOM_LEVELS);
+        return data ? JSON.parse(data) : {};
+    }
+
+    function saveCustomLevel(levelId, config) {
+        const customLevels = getCustomLevels();
+        customLevels[levelId] = config;
+        localStorage.setItem(KEYS.CUSTOM_LEVELS, JSON.stringify(customLevels));
+        return customLevels;
+    }
+
+    function resetCustomLevels() {
+        localStorage.removeItem(KEYS.CUSTOM_LEVELS);
     }
 
     // ===== Progression Stats =====
@@ -186,6 +204,9 @@ const Storage = (function () {
         saveSettings,
         setLevel,
         setBadDayMode,
+        getCustomLevels,
+        saveCustomLevel,
+        resetCustomLevels,
         getStreak,
         getSessionsAtLevel,
         getTotalSessions,

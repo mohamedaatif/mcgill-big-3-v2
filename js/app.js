@@ -103,6 +103,7 @@
         settingVibration: document.getElementById('settingVibration'),
         holdValue: document.getElementById('holdValue'),
         restValue: document.getElementById('restValue'),
+        levelsEditor: document.getElementById('levelsEditor'),
         btnExportData: document.getElementById('btnExportData'),
         btnResetSettings: document.getElementById('btnResetSettings')
     };
@@ -926,6 +927,93 @@
         elements.restValue.textContent = `${restDuration}s`;
         elements.settingSound.checked = settings.soundEnabled !== false;
         elements.settingVibration.checked = settings.vibrationEnabled !== false;
+
+        populateLevelsEditor();
+    }
+
+    function populateLevelsEditor() {
+        const levelOrder = Exercises.getLevelOrder();
+        const customLevels = Storage.getCustomLevels();
+
+        let html = '';
+        levelOrder.forEach(levelId => {
+            const defaultLevel = Exercises.getDefaultLevel(levelId);
+            const currentLevel = Exercises.getLevel(levelId);
+            const isCustomized = !!customLevels[levelId];
+
+            html += `
+                <div class="level-card" data-level="${levelId}">
+                    <div class="level-card-header">
+                        <span class="level-card-name">${defaultLevel.name}${isCustomized ? ' *' : ''}</span>
+                        <span class="level-card-desc">${currentLevel.pyramid.join('-')} × ${currentLevel.holdDuration}s</span>
+                    </div>
+                    <div class="level-card-body">
+                        <div class="level-inputs">
+                            <div class="level-input-group">
+                                <label>Set 1</label>
+                                <input type="number" data-field="set1" min="1" max="20" value="${currentLevel.pyramid[0] || 0}">
+                            </div>
+                            <div class="level-input-group">
+                                <label>Set 2</label>
+                                <input type="number" data-field="set2" min="0" max="20" value="${currentLevel.pyramid[1] || 0}">
+                            </div>
+                            <div class="level-input-group">
+                                <label>Set 3</label>
+                                <input type="number" data-field="set3" min="0" max="20" value="${currentLevel.pyramid[2] || 0}">
+                            </div>
+                            <div class="level-input-group">
+                                <label>Hold</label>
+                                <input type="number" data-field="hold" min="1" max="120" value="${currentLevel.holdDuration}">
+                            </div>
+                        </div>
+                        <div class="level-card-actions">
+                            <button class="btn btn-primary btn-sm" data-action="save">Save</button>
+                            <button class="btn btn-secondary btn-sm" data-action="reset">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        elements.levelsEditor.innerHTML = html;
+
+        // Add event listeners
+        elements.levelsEditor.querySelectorAll('.level-card').forEach(card => {
+            const levelId = card.dataset.level;
+
+            // Toggle expand
+            card.querySelector('.level-card-header').addEventListener('click', () => {
+                card.classList.toggle('expanded');
+            });
+
+            // Save button
+            card.querySelector('[data-action="save"]').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const set1 = parseInt(card.querySelector('[data-field="set1"]').value) || 0;
+                const set2 = parseInt(card.querySelector('[data-field="set2"]').value) || 0;
+                const set3 = parseInt(card.querySelector('[data-field="set3"]').value) || 0;
+                const hold = parseInt(card.querySelector('[data-field="hold"]').value) || 10;
+
+                const pyramid = [set1, set2, set3].filter(n => n > 0);
+                if (pyramid.length === 0) pyramid.push(1);
+
+                Storage.saveCustomLevel(levelId, { pyramid, holdDuration: hold });
+                populateLevelsEditor();
+                updateLevelDisplay();
+                updateExerciseMeta();
+            });
+
+            // Reset button
+            card.querySelector('[data-action="reset"]').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const customLevels = Storage.getCustomLevels();
+                delete customLevels[levelId];
+                localStorage.setItem('mcgill_v2_custom_levels', JSON.stringify(customLevels));
+                populateLevelsEditor();
+                updateLevelDisplay();
+                updateExerciseMeta();
+            });
+        });
     }
 
     // ===== Initialize =====

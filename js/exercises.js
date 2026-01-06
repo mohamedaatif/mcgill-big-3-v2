@@ -172,6 +172,18 @@ const Exercises = (function () {
     }
 
     function getLevel(levelId) {
+        const baseLevel = LEVELS[levelId] || LEVELS.standard;
+
+        // Check for custom overrides
+        const customLevels = Storage.getCustomLevels();
+        if (customLevels[levelId]) {
+            return { ...baseLevel, ...customLevels[levelId] };
+        }
+
+        return baseLevel;
+    }
+
+    function getDefaultLevel(levelId) {
         return LEVELS[levelId] || LEVELS.standard;
     }
 
@@ -324,6 +336,7 @@ const Exercises = (function () {
         getExercise,
         getAllExercises,
         getLevel,
+        getDefaultLevel,
         getAllLevels,
         getLevelOrder,
         getNextLevel,
