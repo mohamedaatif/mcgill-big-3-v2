@@ -323,28 +323,35 @@ const Timer = (function () {
         const current = getCurrentStep();
         state.timeLeft = current.duration;
 
-        // Check for side switch on bilateral exercises (when starting new side's hold)
-        const sideChanged = prevStep.side && current.side && prevStep.side !== current.side;
+        // Check if we're about to switch sides (look ahead for bilateral exercises)
+        // Trigger at start of REST if the next HOLD will be a different side
+        let upcomingSideSwitch = false;
+        if (current.type === 'rest' && prevStep.type === 'hold') {
+            // Look ahead to find the next hold
+            const nextHoldStep = state.plan.plan.slice(state.currentIndex + 1)
+                .find(step => step.type === 'hold');
 
-        if (sideChanged && current.type === 'hold') {
-            // Side is switching - play distinct feedback
-            sounds.switchSides();
-            vibrations.switchSides();
+            if (nextHoldStep && prevStep.side && nextHoldStep.side !== prevStep.side) {
+                upcomingSideSwitch = true;
+                // Side is about to switch - play feedback so user can reposition during rest
+                sounds.switchSides();
+                vibrations.switchSides();
 
-            if (state.callbacks.onSideSwitch) {
-                state.callbacks.onSideSwitch(current.side);
+                if (state.callbacks.onSideSwitch) {
+                    state.callbacks.onSideSwitch(nextHoldStep.side);
+                }
             }
         }
 
         // Play new phase sound
         if (current.type === 'hold') {
-            // Don't play startHold if we just played switchSides
-            if (!sideChanged) {
-                sounds.startHold();
-            }
+            sounds.startHold();
             vibrations.startHold();
         } else {
-            sounds.startRest();
+            // Don't play normal rest sound if we just played side switch
+            if (!upcomingSideSwitch) {
+                sounds.startRest();
+            }
             vibrations.startRest();
         }
 
